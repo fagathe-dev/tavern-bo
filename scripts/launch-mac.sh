@@ -1,5 +1,5 @@
 #!/bin/sh
-api_dir='/Users/fagathe/workspace/perso/depense'
+api_dir='/Users/fagathe/workspace/perso/tavern-bo'
 api_host='dev.bo-tavern.agathefrederick.fr'
 port='5500'
 db_driver='mysql'
