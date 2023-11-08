@@ -30,6 +30,16 @@ final class TokenGenerator
     }
 
     /**
+     * generateCode
+     *
+     * @return string
+     */
+    public function generateCode(): string
+    {
+        return $this->generateRandomString(6, self::NUMERIC);
+    }
+
+    /**
      * generateRandomString
      *
      * @param  mixed $length
