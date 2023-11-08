@@ -77,3 +77,9 @@ header .navbar-brand img,
 .navbar-toggler:focus {
   box-shadow: none;
 }
+
+[data-theme-toggler] > i {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
