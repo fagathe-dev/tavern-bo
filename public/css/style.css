@@ -26,6 +26,35 @@ body {
   justify-content: flex-start;
 }
 
+header .navbar,
+.header .navbar {
+  height: 60px;
+  box-shadow: 2px -2px 10px 4px rgba(0, 0, 0, 0.1);
+}
+
+header,
+.header {
+  height: auto;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+header .navbar-brand img,
+.header .navbar-brand img {
+  width: 85px;
+  height: auto;
+  max-height: 50px;
+}
+
+.navbar > [class^="container"] {
+  justify-content: space-between;
+}
+.navbar-expand-lg .navbar-collapse {
+  justify-content: flex-end;
+}
+
 .main-content {
   width: 100%;
   height: fit-content;
@@ -34,4 +63,17 @@ body {
   flex-flow: column nowrap;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.navbar-collapse.show .navbar-nav {
+  background-color: var(--bs-body-bg);
+  z-index: auto;
+}
+
+.navbar-collapse.show {
+  width: 100%;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
 }

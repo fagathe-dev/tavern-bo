@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>BO Tavern</title>
-        <link rel="icon" href="images/favicon.svg">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-        <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-        {% block stylesheets %}{% endblock %}
-    </head>
-    <body>
-        <div class="wrapper">
-            <header class="sidebar">
-                navbar
-            </header>
-            <main class="main-content">
-                <section class="container-fluid">
-                    {% block body %}{% endblock %}
-                </section>
-            </main>
-        </div>
-        
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="{{ asset('js/main.js') }}"></script>
-        {% block javascripts %}{% endblock %}
-    </body>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BO Tavern</title>
+    <link rel="icon" href="images/favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    {% block stylesheets %}{% endblock %}
+  </head>
+  <body>
+    <div class="wrapper">
+      {% include "elements/navbar.html.twig" %}
+      <main class="main-content">
+        <section class="container-fluid">
+          {% block body %}{% endblock %}
+        </section>
+      </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/main.js') }}"></script>
+    {% block javascripts %}{% endblock %}
+  </body>
 </html>
