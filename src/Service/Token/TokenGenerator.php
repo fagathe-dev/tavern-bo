@@ -1,5 +1,5 @@
 <?php
-namespace App\Service;
+namespace App\Service\Token;
 
 final class TokenGenerator
 {
@@ -11,7 +11,7 @@ final class TokenGenerator
     private const UPPERCASE = 'AZERTYUIOPQSDFGHJKLMWXCVBN';
 
     private const LOWERCASE = 'azertyuiopqsdfghjklmwxcvbn';
-    
+
     /**
      * generate
      *
@@ -28,7 +28,7 @@ final class TokenGenerator
 
         return $this->generateRandomString($length, $chars);
     }
-    
+
     /**
      * generateRandomString
      *
