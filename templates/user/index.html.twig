@@ -47,5 +47,16 @@
         </tbody>
       </table>
     </div>
+    <div class="d-flex justify-content-between mt-4">
+      <div class="result-infos">
+        {# TODO: afficher le nombre de résultats pour voir la progression #}
+        <span class="fw-bold">{{ paginatedUsers.items|length }}</span>
+        résultats sur 
+        {{ paginatedUsers.getTotalItemCount }}
+      </div>
+      <div class="pagination-wrap hstack">
+        {{ knp_pagination_render(paginatedUsers) }}
+      </div>
+    </div>
   </div>  
 {% endblock %}
