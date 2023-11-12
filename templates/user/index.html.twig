@@ -28,10 +28,10 @@
               <td>{{ user.roles|join(', ') }}</td>
               <td>
                 <a 
-                {# {{ path('admin_user_edit', {
+                {#  #}
+                  href="{{ path('app_user_edit', {
                     id: user.id
-                  }) }} #}
-                  href="#" 
+                  }) }}" 
                   class="btn btn-info"
                   title="Modifier le compte de {{ user.username }}"
                 >

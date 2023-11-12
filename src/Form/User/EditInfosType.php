@@ -20,7 +20,7 @@ class EditInfosType extends AbstractType
                 'label' => 'Nom d\'utilisateur',
             ])
             ->add('roles', ChoiceType::class, [
-                'label' => 'Nom de famille',
+                'label' => 'Rôles',
                 'choices' => RoleEnum::choices(),
                 'row_attr' => ['class' => 'form-check form-inline-check'],
                 'multiple' => true,

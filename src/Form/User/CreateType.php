@@ -25,7 +25,7 @@ class CreateType extends AbstractType
                 'label' => 'Adresse e-mail',
             ])
             ->add('roles', ChoiceType::class, [
-                'label' => 'Nom de famille',
+                'label' => 'Rôles',
                 'choices' => RoleEnum::choices(),
                 'multiple' => true,
                 'expanded' => true,
