@@ -6,6 +6,7 @@ use App\Form\User\CreateType;
 use App\Form\User\EditInfosType;
 use App\Service\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -45,7 +46,7 @@ class UserController extends AbstractController
             }
         }
 
-        return $this->render('user/create.html.twig', compact('form','user'));
+        return $this->render('user/create.html.twig', compact('form', 'user'));
     }
 
     #[Route(path: '', name: 'index', methods: ['GET'])]
@@ -53,4 +54,23 @@ class UserController extends AbstractController
     {
         return $this->render("user/index.html.twig", $this->service->index($request));
     }
+
+    #[Route(path: '/delete/{id}', name: 'delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
+    public function delete(User $user): JsonResponse
+    {
+        $response = $this->service->remove($user);
+        if (gettype($response) === 'object') {
+            return $this->json(
+                $response->data,
+                $response->status,
+                $response->headers,
+            );
+        }
+
+        return $this->json(
+            'BAD REQUEST',
+            Response::HTTP_BAD_REQUEST
+        );
+    }
+
 }

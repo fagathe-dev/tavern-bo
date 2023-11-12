@@ -3,6 +3,7 @@ namespace App\Service;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Utils\ServiceTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Knp\Component\Pager\Pagination\PaginationInterface;
@@ -14,6 +15,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserService
 {
+
+    use ServiceTrait;
 
     private Session $session;
 
@@ -39,7 +42,7 @@ final class UserService
 
         return $this->save($user);
     }
-    
+
     /**
      * hash
      *
@@ -92,12 +95,12 @@ final class UserService
      * @param  User $object
      * @return object
      */
-    public function remove(User $user): bool
+    public function remove(User $user): bool|object
     {
         try {
             $this->manager->remove($user);
             $this->manager->flush();
-            return true;
+            return $this->sendNoContent();
         } catch (ORMException $e) {
             $this->session->getFlashBag()->add('danger', 'Une erreur est survenue lors de la suppression de votre compte !');
             return false;

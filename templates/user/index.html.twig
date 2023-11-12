@@ -28,7 +28,6 @@
               <td>{{ user.roles|join(', ') }}</td>
               <td>
                 <a 
-                {#  #}
                   href="{{ path('app_user_edit', {
                     id: user.id
                   }) }}" 
@@ -38,10 +37,9 @@
                   <i class="bi bi-pencil-square"></i>
                 </a>
                 <a 
-                  {# {{ path('admin_user_delete', {
+                  href="{{ path('app_user_delete', {
                     id: user.id
-                  }) }} #}
-                  href="#" 
+                  }) }}" 
                   class="btn btn-danger"
                   title="Supprimer le compte de {{ user.username }}"
                   onclick="deleteUser(event);"
@@ -66,4 +64,24 @@
       </div>
     </div>
   </div>  
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    const deleteUser = async (e) => {
+      e.preventDefault();
+      const url = e.target.href;
+      try {
+        const res = await axios.delete(url)
+        if (res.status === 204) {
+          e.target.closest('tr').remove();
+          new Toast('User deleted 🚀', 'success')
+        }
+      } catch (e) {
+        console.error(e.message);
+        new Toast(e.message, 'danger');
+      }
+      return;
+    }
+  </script>
 {% endblock %}
