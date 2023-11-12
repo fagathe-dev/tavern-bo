@@ -2,7 +2,12 @@
 
 {% block body %}
   <div class="row mt-3">
-    <h1 class="h4">Liste des utilisateurs</h1>
+    <h1 class="h4 d-flex justify-content-between">
+      Liste des utilisateurs
+      <a href="{{ path('app_user_create') }}" title="Créer un utilisateur" class="btn btn-sm btn-success">
+        <i class="bi bi-plus-lg"></i>
+      </a>
+    </h1>
     <div class="">
       <table class="table table-responsive table-card mb-1 w-100">
         <thead>
@@ -23,23 +28,23 @@
               <td>{{ user.roles|join(', ') }}</td>
               <td>
                 <a 
-                  href="{{ path('admin_user_edit', {
+                  href="{{ path('app_user_edit', {
                     id: user.id
                   }) }}" 
-                  class="btn btn-ghost-info waves-effect waves-light btn-icon"
+                  class="btn btn-info"
                   title="Modifier le compte de {{ user.username }}"
                 >
-                  <i class="ri-pencil-line"></i>
+                  <i class="bi bi-pencil-square"></i>
                 </a>
                 <a 
-                  href="{{ path('admin_user_delete', {
+                  href="{{ path('app_user_delete', {
                     id: user.id
                   }) }}" 
-                  class="btn btn-ghost-danger waves-effect waves-light btn-icon"
+                  class="btn btn-danger"
                   title="Supprimer le compte de {{ user.username }}"
                   onclick="deleteUser(event);"
                 >
-                  <i class="ri-delete-bin-5-line"></i>
+                  <i class="bi bi-trash"></i>
                 </a>
               </td>
             </tr>                                
@@ -59,4 +64,24 @@
       </div>
     </div>
   </div>  
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    const deleteUser = async (e) => {
+      e.preventDefault();
+      const url = e.target.href;
+      try {
+        const res = await axios.delete(url)
+        if (res.status === 204) {
+          e.target.closest('tr').remove();
+          new Toast('User deleted 🚀', 'success')
+        }
+      } catch (e) {
+        console.error(e.message);
+        new Toast(e.message, 'danger');
+      }
+      return;
+    }
+  </script>
 {% endblock %}

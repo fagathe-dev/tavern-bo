@@ -1,0 +1,6 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <h1 class="h4 mb-lg-3">Modifier l'utilisateur <em class="text-primary">#{{user.id}}</em></h1>
+  {% include 'user/_form.html.twig' with {form: form} %}
+{% endblock %}
