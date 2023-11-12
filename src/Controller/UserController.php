@@ -24,8 +24,8 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             if ($this->service->create($user)) {
+                return $this->redirectToRoute('app_user_index');
             }
         }
 

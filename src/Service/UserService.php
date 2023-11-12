@@ -55,7 +55,8 @@ final class UserService
      */
     public function create(User $user): bool
     {
-        $user->setCreatedAt(new \DateTimeImmutable);
+        $user->setCreatedAt(new \DateTimeImmutable)
+            ->setConfirm(true);
         $this->hash($user);
 
         return $this->save($user);
