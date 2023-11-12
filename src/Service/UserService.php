@@ -39,7 +39,13 @@ final class UserService
 
         return $this->save($user);
     }
-
+    
+    /**
+     * hash
+     *
+     * @param  mixed $user
+     * @return User
+     */
     private function hash(User $user): User
     {
         return $user->setPassword(

@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\User\CreateType;
+use App\Form\User\EditInfosType;
 use App\Service\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,6 +15,21 @@ class UserController extends AbstractController
 {
     public function __construct(private UserService $service)
     {
+    }
+
+    #[Route(path: '/edit/{id}', name: 'edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function edit(User $user, Request $request): Response
+    {
+        $form = $this->createForm(EditInfosType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($this->service->update($user)) {
+                return $this->redirectToRoute('app_user_index');
+            }
+        }
+
+        return $this->render('user/edit.html.twig', compact('form', 'user'));
     }
 
     #[Route(path: '/create', name: 'create', methods: ['GET', 'POST'])]
@@ -29,7 +45,7 @@ class UserController extends AbstractController
             }
         }
 
-        return $this->render('user/create.html.twig', ['form' => $form]);
+        return $this->render('user/create.html.twig', compact('form','user'));
     }
 
     #[Route(path: '', name: 'index', methods: ['GET'])]
