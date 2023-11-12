@@ -5,8 +5,10 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -85,6 +87,33 @@ final class UserService
             $this->session->getFlashBag()->add('danger', 'Une erreur est survenue lors de la suppression de votre compte !');
             return false;
         }
+    }
+
+    /**
+     * @param  mixed $request
+     * @return PaginationInterface
+     */
+    public function getUsers(Request $request): PaginationInterface
+    {
+
+        $data = $this->repository->findAll(); #findUsersAdmin();
+        $page = $request->query->getInt('page', 1);
+        $nbItems = $request->query->getInt('nbItems', 15);
+
+        return $this->paginator->paginate(
+            $data,
+            /* query NOT result */
+            $page,
+            /*page number*/
+            $nbItems, /*limit per page*/
+        );
+    }
+
+    public function index(Request $request): array
+    {
+        $paginatedUsers = $this->getUsers($request);
+
+        return compact('paginatedUsers');
     }
 
 }
