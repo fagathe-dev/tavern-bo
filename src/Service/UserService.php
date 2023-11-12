@@ -40,6 +40,13 @@ final class UserService
         return $this->save($user);
     }
 
+    private function hash(User $user): User
+    {
+        return $user->setPassword(
+            $this->hasher->hashPassword($user, $user->getPassword())
+        );
+    }
+
     /**
      * create
      *
@@ -48,7 +55,9 @@ final class UserService
      */
     public function create(User $user): bool
     {
-        $user->setCreatedAt(new \DateTimeImmutable);
+        $user->setCreatedAt(new \DateTimeImmutable)
+            ->setConfirm(true);
+        $this->hash($user);
 
         return $this->save($user);
     }
