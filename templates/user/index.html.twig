@@ -2,7 +2,12 @@
 
 {% block body %}
   <div class="row mt-3">
-    <h1 class="h4">Liste des utilisateurs</h1>
+    <h1 class="h4 d-flex justify-content-between">
+      Liste des utilisateurs
+      <a href="{{ path('app_user_create') }}" class="btn btn-sm btn-success">
+        <i class="bi bi-plus-lg"></i>
+      </a>
+    </h1>
     <div class="">
       <table class="table table-responsive table-card mb-1 w-100">
         <thead>
