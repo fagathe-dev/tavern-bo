@@ -23,23 +23,25 @@
               <td>{{ user.roles|join(', ') }}</td>
               <td>
                 <a 
-                  href="{{ path('admin_user_edit', {
+                {# {{ path('admin_user_edit', {
                     id: user.id
-                  }) }}" 
-                  class="btn btn-ghost-info waves-effect waves-light btn-icon"
+                  }) }} #}
+                  href="#" 
+                  class="btn btn-info"
                   title="Modifier le compte de {{ user.username }}"
                 >
-                  <i class="ri-pencil-line"></i>
+                  <i class="bi bi-pencil-square"></i>
                 </a>
                 <a 
-                  href="{{ path('admin_user_delete', {
+                  {# {{ path('admin_user_delete', {
                     id: user.id
-                  }) }}" 
-                  class="btn btn-ghost-danger waves-effect waves-light btn-icon"
+                  }) }} #}
+                  href="#" 
+                  class="btn btn-danger"
                   title="Supprimer le compte de {{ user.username }}"
                   onclick="deleteUser(event);"
                 >
-                  <i class="ri-delete-bin-5-line"></i>
+                  <i class="bi bi-trash"></i>
                 </a>
               </td>
             </tr>                                
