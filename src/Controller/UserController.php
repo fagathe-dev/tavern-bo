@@ -58,9 +58,19 @@ class UserController extends AbstractController
     #[Route(path: '/delete/{id}', name: 'delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
     public function delete(User $user): JsonResponse
     {
-        dd($this->service->remove($user));
+        $response = $this->service->remove($user);
+        if (gettype($response) === 'object') {
+            return $this->json(
+                $response->data,
+                $response->status,
+                $response->headers,
+            );
+        }
 
-        return $this->json([], Response::HTTP_NO_CONTENT);
+        return $this->json(
+            'BAD REQUEST',
+            Response::HTTP_BAD_REQUEST
+        );
     }
 
 }
