@@ -18,8 +18,6 @@ final class UserService
 
     use ServiceTrait;
 
-    private Session $session;
-
     public function __construct(
         private UserRepository $repository,
         private PaginatorInterface $paginator,
@@ -27,7 +25,6 @@ final class UserService
         private LoggerInterface $logger,
         private EntityManagerInterface $manager
     ) {
-        $this->session = new Session;
     }
 
     /**
@@ -84,7 +81,7 @@ final class UserService
             $this->manager->flush();
             return true;
         } catch (ORMException $e) {
-            $this->session->getFlashBag()->add('danger', 'Une erreur est survenue lors de l\'enregistrement de votre compte !');
+            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de votre compte !');
             return false;
         }
     }
@@ -102,7 +99,7 @@ final class UserService
             $this->manager->flush();
             return $this->sendNoContent();
         } catch (ORMException $e) {
-            $this->session->getFlashBag()->add('danger', 'Une erreur est survenue lors de la suppression de votre compte !');
+            $this->addFlash('danger', 'Une erreur est survenue lors de la suppression de votre compte !');
             return false;
         }
     }
@@ -127,6 +124,12 @@ final class UserService
         );
     }
 
+    /**
+     * index
+     *
+     * @param  mixed $request
+     * @return array
+     */
     public function index(Request $request): array
     {
         $paginatedUsers = $this->getUsers($request);
