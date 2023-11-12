@@ -39,7 +39,7 @@ final class UserService
 
         return $this->save($user);
     }
-    
+
     /**
      * hash
      *
