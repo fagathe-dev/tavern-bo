@@ -3,6 +3,8 @@ namespace App\Service;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\Breadcrumb\Breadcrumb;
+use App\Service\Breadcrumb\BreadcrumbItem;
 use App\Utils\ServiceTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -132,9 +134,13 @@ final class UserService
      */
     public function index(Request $request): array
     {
+        $breadcrumb = new Breadcrumb([
+            new BreadcrumbItem('Liste des utilisateurs'),
+        ]);
+
         $paginatedUsers = $this->getUsers($request);
 
-        return compact('paginatedUsers');
+        return compact('paginatedUsers', 'breadcrumb');
     }
 
 }
