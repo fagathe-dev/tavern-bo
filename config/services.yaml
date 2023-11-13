@@ -19,6 +19,11 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
-
+    
+    # Add custom twig filters & functions
+    twig_extension:
+        resource: '../src/Twig/*'
+        namespace: App\Twig\
+        tags: ['twig.extension']
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
