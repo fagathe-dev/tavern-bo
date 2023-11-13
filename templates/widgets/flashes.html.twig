@@ -1,0 +1,6 @@
+{% for message, type in app.flashes %}
+  <div class="alert alert-{{ type[0] }} alert-dismissible alert-borderless shadow fade show" role="alert">
+    <small>{{ message|raw }}</small>
+    <button class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+{% endfor %}
