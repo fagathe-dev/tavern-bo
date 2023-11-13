@@ -15,6 +15,7 @@
       {% include "elements/navbar.html.twig" %}
       <main class="main-content">
         <section class="container-fluid container-xl">
+          {% include "widgets/breadcrumb.html.twig" %}
           {% block body %}{% endblock %}
         </section>
       </main>
