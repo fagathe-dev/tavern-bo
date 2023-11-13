@@ -38,8 +38,15 @@ final class UserService
     public function update(User $user): bool
     {
         $user->setUpdatedAt(new \DateTimeImmutable);
+        $result = $this->save($user);
 
-        return $this->save($user);
+        if ($result) {
+            $this->addFlash('success', 'Utilisateur enregistré 🚀');
+        } else {
+            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
+        }
+
+        return $result;
     }
 
     /**
@@ -67,7 +74,15 @@ final class UserService
             ->setConfirm(true);
         $this->hash($user);
 
-        return $this->save($user);
+        $result = $this->save($user);
+
+        if ($result) {
+            $this->addFlash('success', 'Utilisateur crée 🚀');
+        } else {
+            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
+        }
+
+        return $result;
     }
 
     /**
@@ -83,7 +98,6 @@ final class UserService
             $this->manager->flush();
             return true;
         } catch (ORMException $e) {
-            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de votre compte !');
             return false;
         }
     }
