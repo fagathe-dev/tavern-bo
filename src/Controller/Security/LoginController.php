@@ -14,9 +14,9 @@ class LoginController extends AbstractController
     {
         $title = 'Connexion';
 
-        if ($this->getUser()) {
-            return $this->redirectToRoute('app_default');
-        }
+        // if ($this->getUser()) {
+        //     return $this->redirectToRoute('app_default');
+        // }
 
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
