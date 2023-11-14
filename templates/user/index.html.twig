@@ -25,7 +25,7 @@
               <th scope="row">{{ user.id }}</th>
               <td>{{ user.username }}</td>
               <td>{{ user.email }}</td>
-              <td>{{ user.roles|join(', ') }}</td>
+              <td>{{ roles(user) }}</td>
               <td>
                 <a 
                   href="{{ path('app_user_edit', {

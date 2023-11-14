@@ -8,7 +8,7 @@ use Twig\Extension\AbstractExtension;
 
 final class BreadcrumbExtension extends AbstractExtension
 {
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('generate_breadcrumb', [$this, 'generateBreadcrumb'], ['is_safe' => ['html']]),

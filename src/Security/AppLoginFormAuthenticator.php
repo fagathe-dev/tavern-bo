@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Enum\User\RoleEnum;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,13 +32,26 @@ class AppLoginFormAuthenticator extends AbstractLoginFormAuthenticator
     ) {
     }
 
+    private function isAllowedUser(User $user): bool
+    {
+        $allowedRoles = [RoleEnum::ROLE_MANAGER, RoleEnum::ROLE_ADMIN];
+
+        foreach ($user->getRoles() as $role) {
+            if (in_array($role, $allowedRoles)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function authenticate(Request $request): Passport
     {
         $username = $request->request->get('username', '');
         $password = $request->request->get('password', '');
         $rememberMe = $request->request->get('_remember_me', '');
 
-        $user = $this->userRepository->findOneBy(['username' => $username]);
+        $user = $this->userRepository->findOneBy(['email' => $username]);
 
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $username);
 
@@ -46,19 +60,25 @@ class AppLoginFormAuthenticator extends AbstractLoginFormAuthenticator
         if ($rememberMe && $rememberMe === "on") {
             $badges = [...$badges, (new RememberMeBadge)->enable()];
         }
+
         if ($user instanceof User) {
             if ($user->isConfirm() === false) {
-                throw new CustomUserMessageAuthenticationException('Veuillez confirmer votre compte');
+                throw new CustomUserMessageAuthenticationException('Veuillez confirmer votre compte.');
             }
-            $passport = new Passport(
-                new UserBadge($username),
-                new PasswordCredentials($password),
-                $badges
-            );
-            return $passport;
+            if ($this->isAllowedUser($user)) {
+                $passport = new Passport(
+                    new UserBadge($username),
+                    new PasswordCredentials($password),
+                    $badges
+                );
+
+                return $passport;
+            }
+
+            throw new CustomUserMessageAuthenticationException('Accès non autorisé.');
         }
 
-        throw new CustomUserMessageAuthenticationException('Identifiants incorrects');
+        throw new CustomUserMessageAuthenticationException('Identifiants incorrects.');
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
