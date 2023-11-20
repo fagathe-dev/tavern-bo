@@ -32,6 +32,11 @@ class AppLoginFormAuthenticator extends AbstractLoginFormAuthenticator
     ) {
     }
 
+    public function supports(Request $request): bool
+    {
+        return $request->isMethod('POST') && $this->urlGenerator->generate(self::LOGIN_ROUTE) === $request->getPathInfo();
+    }
+
     private function isAllowedUser(User $user): bool
     {
         $allowedRoles = [RoleEnum::ROLE_MANAGER, RoleEnum::ROLE_ADMIN];
@@ -66,13 +71,12 @@ class AppLoginFormAuthenticator extends AbstractLoginFormAuthenticator
                 throw new CustomUserMessageAuthenticationException('Veuillez confirmer votre compte.');
             }
             if ($this->isAllowedUser($user)) {
-                $passport = new Passport(
+
+                return new Passport(
                     new UserBadge($username),
                     new PasswordCredentials($password),
                     $badges
                 );
-
-                return $passport;
             }
 
             throw new CustomUserMessageAuthenticationException('Accès non autorisé.');
