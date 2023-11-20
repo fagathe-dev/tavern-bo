@@ -64,6 +64,7 @@ class CreateAdminCommand extends Command
             ->setRoles(['ROLE_ADMIN'])
             ->setUsername($username)
             ->setConfirm(true)
+            ->setPassword($password)
         ;
 
         $this->service->create($user);

@@ -1,0 +1,54 @@
+{% extends 'auth/layout.html.twig' %}
+
+{% block body %}
+
+  {% if error %}
+    <div class="alert alert-danger alert-dismissible" role="alert">
+      {{ error.messageKey|trans(error.messageData, 'security') }}
+      <button class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endif %}
+
+  
+  <h1 class="h4 text-center font-weight-normal">Connexion</h1>
+  <form action="{{ url('app_login') }}" name="loginForm" method="POST">
+    
+    <div class="mb-3">
+      <label for="username" class="form-label">Nom d'utilisateur</label>
+      <input 
+        type="email" 
+        class="form-control" 
+        name="username" 
+        id="username" 
+        value="{{ lastUsername }}" 
+        placeholder="username@example.com"
+        autofocus
+        required
+      >
+    </div>
+
+    <div class="mb-3">
+      <label for="password" class="form-label">Mot de passe</label>
+      <input type="password" name="password" id="password" class="form-control" required>
+    </div>
+
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+    <div class="form-check mb-3">
+      <label class="form-check-label" for="_remember_me">Remember me</label>
+      <input type="checkbox" checked class="form-check-input" name="_remember_me" id="_remember_me">
+    </div>
+    <div class="d-flex justify-content-center">
+      <button type="submit" class="btn btn-primary">Me connecter</button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block footer %}
+  {% if app.user %}
+    <small class="mb-3">
+      Vous êtes connecté en tant que {{ app.user.userIdentifier }}, 
+      <a href="{{ path('app_logout') }}">me déconnecter</a>
+    </small>
+  {% endif %}
+  <small>Mot de passe oublié ?</small>
+{% endblock %}
