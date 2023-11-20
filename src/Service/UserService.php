@@ -8,6 +8,7 @@ use App\Service\Breadcrumb\BreadcrumbItem;
 use App\Utils\ServiceTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
+use Exception;
 use Knp\Component\Pager\Pagination\PaginationInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
@@ -37,7 +38,7 @@ final class UserService
      */
     public function update(User $user): bool
     {
-        $user->setUpdatedAt(new \DateTimeImmutable);
+        $user->setUpdatedAt($this->now());
         $result = $this->save($user);
 
         if ($result) {
@@ -57,6 +58,7 @@ final class UserService
      */
     private function hash(User $user): User
     {
+        dd($user);
         return $user->setPassword(
             $this->hasher->hashPassword($user, $user->getPassword())
         );
@@ -70,7 +72,7 @@ final class UserService
      */
     public function create(User $user): bool
     {
-        $user->setCreatedAt(new \DateTimeImmutable)
+        $user->setCreatedAt($this->now())
             ->setConfirm(true);
         $this->hash($user);
 
@@ -99,6 +101,9 @@ final class UserService
             return true;
         } catch (ORMException $e) {
             return false;
+        } catch (Exception $e) {
+            $this->addFlash('danger', $e->getMessage());
+            return false;
         }
     }
 
@@ -117,7 +122,20 @@ final class UserService
         } catch (ORMException $e) {
             $this->addFlash('danger', 'Une erreur est survenue lors de la suppression de votre compte !');
             return false;
+        } catch (Exception $e) {
+            $this->addFlash('danger', $e->getMessage());
+            return false;
         }
+
+    }
+
+    public function updatePassword(string $plainPassword, User $user): bool
+    {
+        $user->setPassword(
+            $this->hasher->hashPassword($user, $plainPassword)
+        );
+
+        return $this->update($user);
     }
 
     /**
