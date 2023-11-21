@@ -31,26 +31,60 @@ final class Uploader
         return $this->parameters->get('uploads_directory') ?? '';
     }
 
+    /**
+     * upload
+     *
+     * @param  UploadedFile $file
+     * @param  string $targetDir
+     * @return void
+     */
     public function upload(UploadedFile $file, string $targetDir = '')
     {
         $targetDir = $this->getBaseDir() . DIRECTORY_SEPARATOR . $targetDir;
         dd($targetDir);
     }
 
-    private function checkMimetype(string $mimetype): bool
+    /**
+     * checkMimetype
+     *
+     * @param  UploadedFile $file
+     * @return bool
+     */
+    private function checkMimetype(UploadedFile $file): bool
     {
         return false;
     }
 
-    private function chackMaxFileSize(): bool
+    /**
+     * chackMaxFileSize
+     *
+     * @param  UploadedFile $file
+     * @return bool
+     */
+    private function chackMaxFileSize(UploadedFile $file): bool
     {
         return false;
     }
 
+    /**
+     * generateDir
+     *
+     * @param  string $dir
+     * @return void
+     */
     private function generateDir(?string $dir = ''): void
     {
+        if ($this->fs->exists($dir)) {
+            $this->fs->mkdir($dir);
+        }
     }
 
+    /**
+     * remove
+     *
+     * @param  string $path
+     * @return void
+     */
     public function remove(?string $path = ''): void
     {
     }
