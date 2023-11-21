@@ -6,6 +6,7 @@ use App\Form\User\CreateType;
 use App\Form\User\EditInfosType;
 use App\Service\Breadcrumb\Breadcrumb;
 use App\Service\Breadcrumb\BreadcrumbItem;
+use App\Service\Uploader\Uploader;
 use App\Service\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route(path: '/user', name: 'app_user_')]
 class UserController extends AbstractController
 {
-    public function __construct(private UserService $service)
+    public function __construct(private UserService $service, private Uploader $uploader, )
     {
     }
 
