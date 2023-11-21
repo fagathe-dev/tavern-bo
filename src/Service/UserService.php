@@ -12,8 +12,8 @@ use Exception;
 use Knp\Component\Pager\Pagination\PaginationInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserService
@@ -26,7 +26,8 @@ final class UserService
         private PaginatorInterface $paginator,
         private UserPasswordHasherInterface $hasher,
         private LoggerInterface $logger,
-        private EntityManagerInterface $manager
+        private EntityManagerInterface $manager,
+        private Security $security
     ) {
     }
 
@@ -58,7 +59,6 @@ final class UserService
      */
     private function hash(User $user): User
     {
-        dd($user);
         return $user->setPassword(
             $this->hasher->hashPassword($user, $user->getPassword())
         );
@@ -80,6 +80,10 @@ final class UserService
 
         if ($result) {
             $this->addFlash('success', 'Utilisateur crée 🚀');
+            $this->logger->info("User `{username}` created by #{admin}", [
+                "username" => $user->getUsername(),
+                'admin' => $this->security->getUser()?->getId()
+            ]);
         } else {
             $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
         }
@@ -98,11 +102,18 @@ final class UserService
         try {
             $this->manager->persist($user);
             $this->manager->flush();
+            $this->logger->info("User `{username}` has been saved in DB by #{admin}", [
+                "username" => $user->getUsername(),
+                'admin' => $this->security->getUser()?->getId()
+            ]);
             return true;
         } catch (ORMException $e) {
+            $this->logger->error($e->getMessage());
+            $this->addFlash('danger', $e->getMessage());
             return false;
         } catch (Exception $e) {
             $this->addFlash('danger', $e->getMessage());
+            $this->logger->error($e->getMessage());
             return false;
         }
     }
@@ -118,12 +129,15 @@ final class UserService
         try {
             $this->manager->remove($user);
             $this->manager->flush();
+            $this->logger->info('User {username} is removed form db', ['username' => $user->getUsername()]);
             return $this->sendNoContent();
         } catch (ORMException $e) {
             $this->addFlash('danger', 'Une erreur est survenue lors de la suppression de votre compte !');
+            $this->logger->error($e->getMessage());
             return false;
         } catch (Exception $e) {
             $this->addFlash('danger', $e->getMessage());
+            $this->logger->error($e->getMessage());
             return false;
         }
 
@@ -134,6 +148,7 @@ final class UserService
         $user->setPassword(
             $this->hasher->hashPassword($user, $plainPassword)
         );
+
 
         return $this->update($user);
     }

@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Entity\User;
 use App\Enum\User\RoleEnum;
 use App\Repository\UserRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,7 +29,8 @@ class AppLoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
-        private UserRepository $userRepository
+        private UserRepository $userRepository,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -68,9 +70,11 @@ class AppLoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
         if ($user instanceof User) {
             if ($user->isConfirm() === false) {
+                $this->logger->warning("User `{username}` not confirm tried to log in.", ["username" => $user->getUsername()]);
                 throw new CustomUserMessageAuthenticationException('Veuillez confirmer votre compte.');
             }
             if ($this->isAllowedUser($user)) {
+                $this->logger->info("User `{username}` created ", ["username" => $user->getUsername()]);
 
                 return new Passport(
                     new UserBadge($username),
@@ -79,9 +83,11 @@ class AppLoginFormAuthenticator extends AbstractLoginFormAuthenticator
                 );
             }
 
+            $this->logger->error("User `{username}` #{id} tried to log in with wrong permission.", ['username' => $user->getUsername(), 'id' => $user->getId()]);
             throw new CustomUserMessageAuthenticationException('Accès non autorisé.');
         }
 
+        $this->logger->error("User `{username}` tried to log in with wrong credentials.", compact('username'));
         throw new CustomUserMessageAuthenticationException('Identifiants incorrects.');
     }
 
