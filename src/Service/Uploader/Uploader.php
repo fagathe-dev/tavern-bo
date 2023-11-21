@@ -87,6 +87,9 @@ final class Uploader
      */
     public function remove(?string $path = ''): void
     {
+        if ($path !== null && $this->fs->exists($path)) {
+            $this->fs->remove($path);
+        }
     }
 
     /**
