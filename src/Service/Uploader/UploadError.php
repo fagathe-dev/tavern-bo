@@ -17,7 +17,7 @@ class UploadError
     /**
      * Get the value of code
      */
-    public function getCode(): int
+    public function getCode(): string
     {
         return $this->code;
     }
