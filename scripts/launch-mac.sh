@@ -6,7 +6,7 @@ db_driver='mysql'
 # enregistrer le nouveau nom de domaine dans le host de la machine
 # echo "127.0.0.1\t${api_host}" | sudo tee -a /etc/hosts
 
-# lance le service postgresql
+echo "lance le service ${db_driver}"
 brew services start $db_driver
 cd $api_dir
 echo 'cd api dir'

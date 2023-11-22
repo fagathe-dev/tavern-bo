@@ -15,13 +15,19 @@ final class TokenGenerator
     /**
      * generate
      *
-     * @param  mixed $length
-     * @param  mixed $chars
-     * @param  mixed $unique
+     * @param  int $length 
+     * @param  string $chars 'all' | 'numeric' | 'uppercase' | 'lowercase'
+     * @param  bool $unique
      * @return string
      */
-    public function generate(?int $length = 10, ?string $chars = self::ALPHANUMERIC, ?bool $unique = false): string
+    public function generate(?int $length = 10, ?string $type = 'all', ?bool $unique = false): string
     {
+        $chars = match ($type) {
+            'uppercase' => self::UPPERCASE,
+            'lowercase' => self::LOWERCASE,
+            'numeric' => self::NUMERIC,
+            default => self::ALPHANUMERIC,
+        };
         if ($unique) {
             return uniqid($this->generateRandomString($length, $chars), true);
         }
