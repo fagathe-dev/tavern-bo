@@ -4,9 +4,11 @@ namespace App\Service\Uploader;
 use App\Helpers\FileHelperTrait;
 use App\Service\Token\TokenGenerator;
 use App\Utils\ServiceTrait;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 final class Uploader
@@ -20,6 +22,7 @@ final class Uploader
     private string $uploadDir = '';
 
     private string $fileName = '';
+    private string $uploadPath = '';
 
     public function __construct(
         private ParameterBagInterface $parameters,
@@ -36,7 +39,7 @@ final class Uploader
      */
     public function getBaseDir(): string
     {
-        return $this->parameters->get('uploads_directory') ?? '';
+        return ($this->parameters->get('root_directory') . $this->parameters->get('uploads_directory')) ?? '';
     }
 
     /**
@@ -70,12 +73,24 @@ final class Uploader
             ]);
         }
 
-        $this->generateFileName($file);
-        $this->setUploadDir($targetDir);
+        $this->generateFileName($file)
+            ->setUploadDir($targetDir)
+            ->setUploadPath($targetDir)
+        ;
 
+        try {
+            $file->move($this->getUploadDir(), $this->getFileName());
+        } catch (FileException $e) {
+            $this->logger->error('Une erreur est survenue lors de l\'enregistrement du fichier dans le dossier {dir} :::: {message}', [
+                'dir' => $this->getUploadDir(),
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
+        }
         return $this;
     }
-    
+
     /**
      * generateFileName
      *
@@ -224,6 +239,27 @@ final class Uploader
     public function setFileName(string $fileName): self
     {
         $this->fileName = $fileName;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of uploadPath
+     */
+    public function getUploadPath(): string
+    {
+        return $this->uploadPath;
+    }
+
+    /**
+     * Set the value of uploadPath
+     *
+     * @param string $uploadPath
+     * @return  self
+     */
+    public function setUploadPath(string $uploadPath): self
+    {
+        $this->uploadPath = $uploadPath . $this->getFileName();
 
         return $this;
     }
