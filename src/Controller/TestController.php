@@ -9,8 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(path: '/test', name: 'app_test_')]
-class TestController extends AbstractController
-{
+class TestController extends AbstractController {
 
     public function __construct(
         private Uploader $uploader
@@ -19,13 +18,12 @@ class TestController extends AbstractController
 
 
     #[Route(path: '/upload', name: 'upload', methods: ['GET', 'POST'])]
-    public function index(Request $request): Response
-    {
+    public function index(Request $request): Response {
         $form = $this->createForm(UploadType::class);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $response = $this->uploader->upload($form->get('file')->getData());
+        if($form->isSubmitted() && $form->isValid()) {
+            $response = $this->uploader->upload($form->get('file')->getData(), fileType: 'image');
             dd($response);
         }
 

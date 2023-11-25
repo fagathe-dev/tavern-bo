@@ -11,8 +11,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-final class Uploader
-{
+final class Uploader {
 
     use ServiceTrait;
     use FileHelperTrait;
@@ -37,9 +36,8 @@ final class Uploader
      *
      * @return string
      */
-    public function getBaseDir(): string
-    {
-        return ($this->parameters->get('root_directory') . $this->parameters->get('uploads_directory')) ?? '';
+    public function getBaseDir(): string {
+        return ($this->parameters->get('root_directory').$this->parameters->get('uploads_directory')) ?? '';
     }
 
     /**
@@ -49,9 +47,8 @@ final class Uploader
      * @param  string $targetDir
      * @return void
      */
-    public function upload(?UploadedFile $file, string $targetDir = ''): self
-    {
-        if ($file === null) {
+    public function upload(?UploadedFile $file, string $targetDir = '', ?string $fileType = null): self {
+        if($file === null) {
             $error = new UploadError('Aucun fichier reçu', 'file', UploadError::UPLOAD_NO_CONTENT);
             $this->setErrors($error);
             $this->logger->error('{code} ::: {type} ::: {message}', [
@@ -63,7 +60,7 @@ final class Uploader
             return $this;
         }
 
-        if ($this->checkMaxFileSize($file, $this->getMaxFileSize())) {
+        if($this->checkMaxFileSize($file, $this->getMaxFileSize())) {
             $error = new UploadError(message: 'Fichier trop lourd', type: 'fileSize', code: UploadError::UPLOAD_ERROR_SIZE);
             $this->setErrors($error);
             $this->logger->error('{code} ::: {type} ::: {message}', [
@@ -71,6 +68,24 @@ final class Uploader
                 'type' => $error->getType(),
                 'message' => $error->getMessage(),
             ]);
+        }
+
+        if($fileType && !in_array($file->getMimeType(), UploadMimeType::getDocumentMimeType($fileType))) {
+            $error = new UploadError(
+                message: 'Fichier ".'.$file->guessClientExtension().'" reçu, seuls les fichiers avec les extensions "'.join(', ', UploadMimeType::getMimeTypeExtensions($fileType)).'" sont acceptés',
+                type: 'fileType',
+                code: UploadError::UPLOAD_MIME_TYPE_ERROR
+            );
+            $this->setErrors($error);
+            $this->logger->error('{code} ::: {type} ::: {message}', [
+                'code' => $error->getCode(),
+                'type' => $error->getType(),
+                'message' => $error->getMessage(),
+            ]);
+        }
+
+        if($this->hasErrors()) {
+            return $this;
         }
 
         $this->generateFileName($file)
@@ -97,11 +112,10 @@ final class Uploader
      * @param  mixed $file
      * @return self
      */
-    private function generateFileName(UploadedFile $file): self
-    {
+    private function generateFileName(UploadedFile $file): self {
         return $this->setFileName(
             str_replace('.', '', $this->tokenGenerator->generate(length: 40, unique: true))
-            . '.' . $file->guessClientExtension()
+            .'.'.$file->guessClientExtension()
         );
     }
 
@@ -111,8 +125,7 @@ final class Uploader
      * @param  UploadedFile $file
      * @return bool
      */
-    private function checkMimetype(UploadedFile $file): bool
-    {
+    private function checkMimetype(UploadedFile $file): bool {
         return false;
     }
 
@@ -121,9 +134,8 @@ final class Uploader
      *
      * @return float
      */
-    private function getMaxFileSize(): float
-    {
-        return (float) $this->parameters->get('uploads_max_file_size');
+    private function getMaxFileSize(): float {
+        return (float)$this->parameters->get('uploads_max_file_size');
     }
 
 
@@ -134,9 +146,8 @@ final class Uploader
      * @param 
      * @return bool
      */
-    private function checkMaxFileSize(UploadedFile $file, ?int $maxFileSize = null): bool
-    {
-        if ($maxFileSize) {
+    private function checkMaxFileSize(UploadedFile $file, ?int $maxFileSize = null): bool {
+        if($maxFileSize) {
             return $maxFileSize > $file->getSize();
         }
 
@@ -149,9 +160,8 @@ final class Uploader
      * @param  string $dir
      * @return void
      */
-    private function generateDir(?string $dir = ''): void
-    {
-        if ($this->fs->exists($dir)) {
+    private function generateDir(?string $dir = ''): void {
+        if($this->fs->exists($dir)) {
             $this->fs->mkdir($dir);
         }
     }
@@ -162,9 +172,8 @@ final class Uploader
      * @param  string $path
      * @return void
      */
-    public function remove(?string $path = ''): void
-    {
-        if ($path !== null && $this->fs->exists($path)) {
+    public function remove(?string $path = ''): void {
+        if($path !== null && $this->fs->exists($path)) {
             $this->fs->remove($path);
         }
     }
@@ -174,8 +183,7 @@ final class Uploader
      *
      * @return bool
      */
-    public function hasErrors(): bool
-    {
+    public function hasErrors(): bool {
         return count($this->getErrors()) > 0;
     }
 
@@ -185,8 +193,7 @@ final class Uploader
      * @param  UploadError $error
      * @return self
      */
-    public function setErrors(UploadError $error): self
-    {
+    public function setErrors(UploadError $error): self {
         $this->errors = [...$this->errors, $error];
 
         return $this;
@@ -195,8 +202,7 @@ final class Uploader
     /**
      * @return UploadError[] 
      */
-    public function getErrors(): array
-    {
+    public function getErrors(): array {
         return $this->errors;
     }
 
@@ -204,8 +210,7 @@ final class Uploader
     /**
      * Get the value of uploadDir
      */
-    public function getUploadDir(): string
-    {
+    public function getUploadDir(): string {
         return $this->uploadDir;
     }
 
@@ -214,9 +219,8 @@ final class Uploader
      *
      * @return self
      */
-    public function setUploadDir(string $uploadDir): self
-    {
-        $this->uploadDir = $this->getBaseDir() . DIRECTORY_SEPARATOR . $uploadDir;
+    public function setUploadDir(string $uploadDir): self {
+        $this->uploadDir = $this->getBaseDir().DIRECTORY_SEPARATOR.$uploadDir;
 
         return $this;
     }
@@ -226,8 +230,7 @@ final class Uploader
      *
      * @return string
      */
-    public function getFileName(): string
-    {
+    public function getFileName(): string {
         return $this->fileName;
     }
 
@@ -236,8 +239,7 @@ final class Uploader
      *
      * @return  self
      */
-    public function setFileName(string $fileName): self
-    {
+    public function setFileName(string $fileName): self {
         $this->fileName = $fileName;
 
         return $this;
@@ -246,8 +248,7 @@ final class Uploader
     /**
      * Get the value of uploadPath
      */
-    public function getUploadPath(): string
-    {
+    public function getUploadPath(): string {
         return $this->uploadPath;
     }
 
@@ -257,9 +258,8 @@ final class Uploader
      * @param string $uploadPath
      * @return  self
      */
-    public function setUploadPath(string $uploadPath): self
-    {
-        $this->uploadPath = $uploadPath . $this->getFileName();
+    public function setUploadPath(string $uploadPath): self {
+        $this->uploadPath = $uploadPath.$this->getFileName();
 
         return $this;
     }
