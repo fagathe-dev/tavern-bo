@@ -18,6 +18,7 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\Form;
+use Symfony\Component\HttpFoundation\Request;
 
 final class ArcService {
     use ServiceTrait;
@@ -36,7 +37,7 @@ final class ArcService {
         $this->slugify = new Slugify;
     }
 
-    private function index(): array {
+    public function index(Request $request): array {
 
         return [];
     }
