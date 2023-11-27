@@ -46,9 +46,13 @@ class Question
     #[ORM\Column(options: ['default' => false])]
     private ?bool $choices = null;
 
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: QuestionMetadata::class)]
+    private Collection $metadatas;
+
     public function __construct()
     {
         $this->answers = new ArrayCollection();
+        $this->metadatas = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -190,6 +194,36 @@ class Question
     public function setChoices(bool $choices): static
     {
         $this->choices = $choices;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, QuestionMetadata>
+     */
+    public function getMetadatas(): Collection
+    {
+        return $this->metadatas;
+    }
+
+    public function addMetadata(QuestionMetadata $metadata): static
+    {
+        if (!$this->metadatas->contains($metadata)) {
+            $this->metadatas->add($metadata);
+            $metadata->setQuestion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMetadata(QuestionMetadata $metadata): static
+    {
+        if ($this->metadatas->removeElement($metadata)) {
+            // set the owning side to null (unless already changed)
+            if ($metadata->getQuestion() === $this) {
+                $metadata->setQuestion(null);
+            }
+        }
 
         return $this;
     }
