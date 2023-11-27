@@ -36,6 +36,11 @@ final class ArcService {
         $this->slugify = new Slugify;
     }
 
+    private function index(): array {
+
+        return [];
+    }
+
     /**
      * import
      *
@@ -111,12 +116,11 @@ final class ArcService {
         }
 
         return $arc->getCreatedAt() === null ? $this->create($arc) : $this->update($arc);
-        ;
     }
 
     public function getPosition(): int {
         $last = $this->arcRepository->findLastPosition();
-        
+
         if($last instanceof Arc) {
             return $last->getPosition();
         }

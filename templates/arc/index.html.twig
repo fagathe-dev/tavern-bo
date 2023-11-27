@@ -1,0 +1,83 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+  <div class="row">
+    <h1 class="h4 d-flex justify-content-between">
+      Liste des arcs
+      <a href="{{ path('app_arc_create') }}" title="Créer un utilisateur" class="btn btn-sm btn-success">
+        <i class="bi bi-plus-lg"></i>
+      </a>
+    </h1>
+    <div class="">
+      <table class="table table-responsive table-card mb-1 w-100">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nom</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for arc in paginatedArcs %}
+            <tr>
+              <th scope="row">{{ arc.id }}</th>
+              <td>{{ arc.name }}</td>
+              <td>
+                <a 
+                  href="{{ path('app_arc_edit', {
+                    id: arc.id
+                  }) }}" 
+                  class="btn btn-info"
+                  title="Modifier l'arc {{ arc.name }}"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                </a>
+                <a 
+                  href="{{ path('app_arc_delete', {
+                    id: arc.id
+                  }) }}" 
+                  class="btn btn-danger"
+                  title="Supprimer l'arc {{ arc.name }}"
+                  onclick="deleteArc(event);"
+                >
+                  <i class="bi bi-trash"></i>
+                </a>
+              </td>
+            </tr>                                
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between mt-4">
+      <div class="result-infos">
+        {# TODO: afficher le nombre de résultats pour voir la progression #}
+        <span class="fw-bold">{{ paginatedArcs.items|length }}</span>
+        résultats sur 
+        {{ paginatedArcs.getTotalItemCount }}
+      </div>
+      <div class="pagination-wrap hstack">
+        {{ knp_pagination_render(paginatedArcs) }}
+      </div>
+    </div>
+  </div>  
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    const deleteArc = async (e) => {
+      e.preventDefault();
+      const url = e.target.href;
+      try {
+        const res = await axios.delete(url)
+        if (res.status === 204) {
+          e.target.closest('tr').remove();
+          new Toast('Arc deleted 🚀', 'success')
+        }
+      } catch (e) {
+        console.error(e.message);
+        new Toast(e.message, 'danger');
+      }
+      return;
+    }
+  </script>
+{% endblock %}

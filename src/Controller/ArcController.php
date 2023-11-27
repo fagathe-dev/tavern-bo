@@ -15,6 +15,12 @@ final class ArcController extends AbstractController {
     public function __construct(private ArcService $service) {
     }
 
+    #[Route('', name: 'index', methods: ['GET'])]
+    public function index(Request $request): Response {
+
+        return $this->render('arc/index.html.twig', $this->service->index($request));
+    }
+
     #[Route(path: '/import', name: 'import', methods: ['GET', 'POST'])]
     public function import(Request $request): Response {
         $breadcrumb = new Breadcrumb();
