@@ -25,9 +25,9 @@
       let trimName = name.replace(/[0-9]/g, '');
       
       const extension = trimName.split('.').pop();
-      trimName = trimName.replace('_', ' ');
-      trimName = trimName.replace('-', ' ');
-      trimName = trimName.replace(`.${extension}`, ' ');
+      trimName = trimName.replaceAll('_', ' ');
+      trimName = trimName.replaceAll('-', ' ');
+      trimName = trimName.replaceAll(`.${extension}`, ' ');
       
       return capitalize(trimName);
     }
