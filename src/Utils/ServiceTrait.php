@@ -10,16 +10,14 @@ use Symfony\Component\Validator\ConstraintViolationList;
 /**
  * @trait ServiceTrait
  */
-trait ServiceTrait
-{
+trait ServiceTrait {
     /**
      * @param string $string
      * @param string $charset='utf-8'
      *
      * @return string
      */
-    public function skipAccents(string $string = '', string $charset = 'utf-8'): string
-    {
+    public function skipAccents(string $string = '', string $charset = 'utf-8'): string {
         $string = trim($string);
         $string = htmlentities($string, ENT_NOQUOTES, $charset);
 
@@ -31,21 +29,11 @@ trait ServiceTrait
     }
 
     /**
-     * now
-     * @return DateTimeImmutable
-     */
-    public function now(): DateTimeImmutable
-    {
-        return new DateTimeImmutable;
-    }
-
-    /**
      * Generate a token
      * @param integer $length
      * @return string
      */
-    public function generateShuffleChars(int $length = 10): string
-    {
+    public function generateShuffleChars(int $length = 10): string {
         $char_to_shuffle = 'azertyuiopqsdfghjklwxcvbnAZERTYUIOPQSDFGHJKLLMWXCVBN1234567890';
         return substr(str_shuffle($char_to_shuffle), 0, $length);
     }
@@ -56,8 +44,7 @@ trait ServiceTrait
      * @param int $length
      * @return string
      */
-    public function generateToken(int $length = 50): string
-    {
+    public function generateToken(int $length = 50): string {
         return uniqid($this->generateShuffleChars($length), true);
     }
 
@@ -67,8 +54,7 @@ trait ServiceTrait
      * @param  mixed $date
      * @return bool
      */
-    public function isDatePast(DateTimeImmutable $date): bool
-    {
+    public function isDatePast(DateTimeImmutable $date): bool {
         return $this->now() < $date;
     }
 
@@ -77,17 +63,15 @@ trait ServiceTrait
      *
      * @return array $json_decoded_data
      */
-    public function tokenBase64Decode(string $token): array
-    {
+    public function tokenBase64Decode(string $token): array {
         return json_decode(base64_decode($token), true);
     }
 
     /**
      * @return string
      */
-    public function generateIdentifier(string $type = "id"): string
-    {
-        return $type . '_' . uniqid($this->generateShuffleChars(10));
+    public function generateIdentifier(string $type = "id"): string {
+        return $type.'_'.uniqid($this->generateShuffleChars(10));
     }
 
     /**
@@ -97,8 +81,7 @@ trait ServiceTrait
      *
      * @return object
      */
-    public function sendJson($data = [], int $status = Response::HTTP_OK, $headers = []): object
-    {
+    public function sendJson($data = [], int $status = Response::HTTP_OK, $headers = []): object {
         $response = new stdClass;
         $response->data = $data;
         $response->status = $status;
@@ -110,8 +93,7 @@ trait ServiceTrait
     /**
      * @return object
      */
-    public function sendNoContent(array $headers = []): object
-    {
+    public function sendNoContent(array $headers = []): object {
         return $this->sendJson([], Response::HTTP_NO_CONTENT, $headers);
     }
 
@@ -121,8 +103,7 @@ trait ServiceTrait
      *
      * @return object|null
      */
-    public function sendViolations(ConstraintViolationList $violations, array $headers = []): ?object
-    {
+    public function sendViolations(ConstraintViolationList $violations, array $headers = []): ?object {
 
         return $this->sendJson(
             [
@@ -140,8 +121,7 @@ trait ServiceTrait
      *
      * @return object|null
      */
-    public function sendCustomViolations(array $violations, int $status = Response::HTTP_BAD_REQUEST, array $headers = []): ?object
-    {
+    public function sendCustomViolations(array $violations, int $status = Response::HTTP_BAD_REQUEST, array $headers = []): ?object {
 
         return $this->sendJson(
             [
@@ -159,20 +139,19 @@ trait ServiceTrait
      * @param  mixed $violations
      * @return array
      */
-    public function filterViolations(ConstraintViolationList $violations): array
-    {
+    public function filterViolations(ConstraintViolationList $violations): array {
         $errors = [];
 
-        if (count($violations) > 0) {
+        if(count($violations) > 0) {
 
-            foreach ($violations as $violation) {
+            foreach($violations as $violation) {
                 $errors[$violation->getPropertyPath()] = $violation->getMessage();
             }
         }
 
         return $errors;
     }
-    
+
     /**
      * addFlash
      *
@@ -180,8 +159,7 @@ trait ServiceTrait
      * @param  mixed $type
      * @return void
      */
-    public function addFlash(?string $message = '', ?string $type = 'info'): void
-    {
+    public function addFlash(?string $message = '', ?string $type = 'info'): void {
         $session = new Session;
         $session->getFlashBag()->add($type, $message);
     }

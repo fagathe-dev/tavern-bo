@@ -9,15 +9,15 @@
           srcset="{{ asset('images/logo.png') }}"
         >
       </a>
-      <button 
-        class="navbar-toggler" 
-        type="button" 
-        data-bs-toggle="collapse" 
-        data-bs-target="#navbar-nav" 
-        aria-controls="navbar-nav" 
-        aria-expanded="false" 
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbar-nav"
+        aria-controls="navbar-nav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      ><span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbar-nav">
         <ul class="navbar-nav me-auto me-lg-0 my-2 my-lg-0">
@@ -29,7 +29,7 @@
             <hr class="d-lg-none my-2 text-white-50">
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Importer</a>
+            <a class="nav-link" href="{{ url('app_arc_import') }}">Importer</a>
           </li>
           <li class="nav-item py-2 py-lg-1 col-12 col-lg-auto">
             <div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white"></div>
@@ -55,13 +55,13 @@
               <li>
                 <button data-theme-toggler class="dropdown-item d-flex align-items-center">
                   <i class="bi bi-sun me-2" data-theme-value="light"></i>
-                  Light
+                  Clair
                 </button>
               </li>
               <li>
                 <button data-theme-toggler class="dropdown-item d-flex align-items-center">
                   <i class="bi bi-moon-stars me-2" data-theme-value="dark"></i>
-                  Dark
+                  Sombre
                 </button>
               </li>
               <li>

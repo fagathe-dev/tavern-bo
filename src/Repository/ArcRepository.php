@@ -14,14 +14,21 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Arc[]    findAll()
  * @method Arc[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ArcRepository extends ServiceEntityRepository
-{
-    public function __construct(ManagerRegistry $registry)
-    {
+class ArcRepository extends ServiceEntityRepository {
+    public function __construct(ManagerRegistry $registry) {
         parent::__construct($registry, Arc::class);
     }
 
-//    /**
+    public function findLastPosition(): Arc {
+        return $this->createQueryBuilder('a')
+            ->orderBy('a.position', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+    
+    //    /**
 //     * @return Arc[] Returns an array of Arc objects
 //     */
 //    public function findByExampleField($value): array
@@ -36,7 +43,7 @@ class ArcRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Arc
+    //    public function findOneBySomeField($value): ?Arc
 //    {
 //        return $this->createQueryBuilder('a')
 //            ->andWhere('a.exampleField = :val')

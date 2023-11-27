@@ -1,5 +1,44 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+  <h1>Importer un arc</h1>
   {{ form(form) }}
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    const inputName = document.getElementById('import_name');
+    const fileInput = document.getElementById('import_file');
+
+    const capitalize = (str) => {
+      const strSplit = str.split(' ')
+      const arr = []
+
+      if (strSplit.length > 1) {
+        strSplit.forEach(s => arr.push(`${s.charAt(0).toUpperCase()}${s.slice(1)}` ));
+      }
+
+      return arr.join(' ');
+    }
+
+    const filterName = (name) => {
+      let trimName = name.replace(/[0-9]/g, '');
+      
+      const extension = trimName.split('.').pop();
+      trimName = trimName.replaceAll('_', ' ');
+      trimName = trimName.replaceAll('-', ' ');
+      trimName = trimName.replaceAll(`.${extension}`, ' ');
+      
+      return capitalize(trimName);
+    }
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      const fileName = filterName(file.name);
+      
+      if (inputName.value === '') {
+        inputName.value = fileName;
+      } 
+    })
+  </script>
 {% endblock %}
