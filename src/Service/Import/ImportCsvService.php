@@ -62,7 +62,9 @@ final class ImportCsvService {
         foreach($rows as $i => $row) {
             $object = [];
             foreach($row as $k => $v) {
-                $object[$columns[$k]] = $v;
+                if(array_key_exists($k, $columns)) {
+                    $object[$columns[$k]] = $v;
+                }
             }
             $data[$i] = (object)$object;
         }

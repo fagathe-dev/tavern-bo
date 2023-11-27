@@ -35,31 +35,28 @@ final class ArcService {
     ) {
         $this->slugify = new Slugify;
     }
-    
+
     /**
      * import
      *
      * @param  mixed $form
      * @return array
      */
-    public function import(Form $form): array {
+    public function import(Form $form): bool {
         $arcName = $form->get('name')->getData();
         $file = $form->get('file')->getData();
-        $position = $form->get('position')->getData() ?? 0;
+        $position = $form->get('position')->getData() ?? ($this->getPosition() + 1);
         $data = $this->importCsvService->getDataFromCsv($file);
+        $arc = $this->arcRepository->findOneBy(['name' => $arcName]);
+        if($arc === null) {
+            $arc = new Arc;
+            $arc->setName($arcName)
+                ->setPosition($position)
+            ;
+        }
 
-        if(count($data) > 0) {
-            $arc = $this->arcRepository->findOneBy(['name' => $arcName]);
+        if($data && count($data) > 0) {
             $questionPosition = $this->questionRepository->findLastQuestionByArc($arc)?->getPosition() ?? 0;
-
-            if($arc === null) {
-                $arc = new Arc;
-                $arc->setName($arcName)
-                    ->setPosition($position)
-                ;
-            } else {
-                $arc->setUpdatedAt($this->now());
-            }
 
             foreach($data as $quote) {
                 $questionExist = $this->questionRepository->findOneBy(['name' => $quote->citation, 'arc' => $arc]);
@@ -111,14 +108,24 @@ final class ArcService {
                     $arc->addQuestion($question);
                 }
             }
-
-            $arc->getCreatedAt() === null ? $this->create($arc) : $this->update($arc);
         }
 
-        return [];
+        return $arc->getCreatedAt() === null ? $this->create($arc) : $this->update($arc);
+        ;
     }
 
+    public function getPosition(): int {
+        $last = $this->arcRepository->findLastPosition();
+        
+        if($last instanceof Arc) {
+            return $last->getPosition();
+        }
+        return 0;
+    }
 
+    public function updatePosition(int $position): void {
+
+    }
 
     /**
      * create
@@ -135,7 +142,7 @@ final class ArcService {
         $user = $this->getUser();
 
         if($result) {
-            $this->addFlash('success', 'Utilisateur crée 🚀');
+            $this->addFlash('success', 'Arc crée 🚀');
             $this->logger->info("Arc `{arc}` created by #{admin}", [
                 "arc" => $user->getUsername(),
                 'admin' => $this->getUser()->getId()
@@ -158,7 +165,7 @@ final class ArcService {
         $result = $this->save($arc);
 
         if($result) {
-            $this->addFlash('success', 'Utilisateur enregistré 🚀');
+            $this->addFlash('success', 'Arc enregistré 🚀');
         } else {
             $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
         }
