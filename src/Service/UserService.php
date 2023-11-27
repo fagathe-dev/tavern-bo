@@ -2,6 +2,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Helpers\DateTimeHelperTrait;
 use App\Repository\UserRepository;
 use App\Service\Breadcrumb\Breadcrumb;
 use App\Service\Breadcrumb\BreadcrumbItem;
@@ -16,10 +17,10 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-final class UserService
-{
+final class UserService {
 
     use ServiceTrait;
+    use DateTimeHelperTrait;
 
     public function __construct(
         private UserRepository $repository,
@@ -37,12 +38,11 @@ final class UserService
      * @param  mixed $user
      * @return bool
      */
-    public function update(User $user): bool
-    {
+    public function update(User $user): bool {
         $user->setUpdatedAt($this->now());
         $result = $this->save($user);
 
-        if ($result) {
+        if($result) {
             $this->addFlash('success', 'Utilisateur enregistré 🚀');
         } else {
             $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
@@ -57,8 +57,7 @@ final class UserService
      * @param  mixed $user
      * @return User
      */
-    private function hash(User $user): User
-    {
+    private function hash(User $user): User {
         return $user->setPassword(
             $this->hasher->hashPassword($user, $user->getPassword())
         );
@@ -70,19 +69,18 @@ final class UserService
      * @param  mixed $user
      * @return bool
      */
-    public function create(User $user): bool
-    {
+    public function create(User $user): bool {
         $user->setCreatedAt($this->now())
             ->setConfirm(true);
         $this->hash($user);
 
         $result = $this->save($user);
 
-        if ($result) {
+        if($result) {
             $this->addFlash('success', 'Utilisateur crée 🚀');
             $this->logger->info("User `{username}` created by #{admin}", [
                 "username" => $user->getUsername(),
-                'admin' => $this->security->getUser()?->getId()
+                'admin' => $this->getUser()->getId() ?? 'anonymous'
             ]);
         } else {
             $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
@@ -97,14 +95,13 @@ final class UserService
      * @param  User $user
      * @return bool
      */
-    public function save(User $user): bool
-    {
+    public function save(User $user): bool {
         try {
             $this->manager->persist($user);
             $this->manager->flush();
             $this->logger->info("User `{username}` has been saved in DB by #{admin}", [
                 "username" => $user->getUsername(),
-                'admin' => $this->security->getUser()?->getId()
+                'admin' => $this->getUser()->getId() ?? 'anonymous'
             ]);
             return true;
         } catch (ORMException $e) {
@@ -124,8 +121,7 @@ final class UserService
      * @param  User $object
      * @return object
      */
-    public function remove(User $user): bool|object
-    {
+    public function remove(User $user): bool|object {
         try {
             $this->manager->remove($user);
             $this->manager->flush();
@@ -143,8 +139,7 @@ final class UserService
 
     }
 
-    public function updatePassword(string $plainPassword, User $user): bool
-    {
+    public function updatePassword(string $plainPassword, User $user): bool {
         $user->setPassword(
             $this->hasher->hashPassword($user, $plainPassword)
         );
@@ -157,8 +152,7 @@ final class UserService
      * @param  mixed $request
      * @return PaginationInterface
      */
-    public function getUsers(Request $request): PaginationInterface
-    {
+    public function getUsers(Request $request): PaginationInterface {
 
         $data = $this->repository->findAll(); #findUsersAdmin();
         $page = $request->query->getInt('page', 1);
@@ -179,8 +173,7 @@ final class UserService
      * @param  mixed $request
      * @return array
      */
-    public function index(Request $request): array
-    {
+    public function index(Request $request): array {
         $breadcrumb = new Breadcrumb([
             new BreadcrumbItem('Liste des utilisateurs'),
         ]);
@@ -188,6 +181,20 @@ final class UserService
         $paginatedUsers = $this->getUsers($request);
 
         return compact('paginatedUsers', 'breadcrumb');
+    }
+
+    /**
+     * get logged User
+     *
+     * @return User
+     */
+    private function getUser(): ?User {
+        $user = $this->security->getUser();
+
+        if($user instanceof User) {
+            return $user;
+        }
+        return null;
     }
 
 }

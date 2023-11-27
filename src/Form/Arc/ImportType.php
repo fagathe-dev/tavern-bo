@@ -3,6 +3,7 @@ namespace App\Form\Arc;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -14,6 +15,13 @@ class ImportType extends AbstractType {
             ->add('name', TextType::class, [
                 'label' => 'Noom de d\'arc',
                 'required' => true,
+            ])
+            ->add('position', NumberType::class, [
+                'label' => 'Position',
+                'attr' => [
+                    'accept' => '.csv'
+                ],
+                'required' => false,
             ])
             ->add('file', FileType::class, [
                 'label' => 'Importer un fichier .csv',
