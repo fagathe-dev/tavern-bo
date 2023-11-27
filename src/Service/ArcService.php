@@ -9,12 +9,16 @@ use App\Entity\User;
 use App\Helpers\DateTimeHelperTrait;
 use App\Repository\ArcRepository;
 use App\Repository\QuestionRepository;
+use App\Service\Breadcrumb\Breadcrumb;
+use App\Service\Breadcrumb\BreadcrumbItem;
 use App\Service\Import\ImportCsvService;
 use App\Utils\ServiceTrait;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Exception;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\Form;
@@ -32,14 +36,39 @@ final class ArcService {
         private ArcRepository $arcRepository,
         private LoggerInterface $logger,
         private Security $security,
-        private EntityManagerInterface $manager
+        private EntityManagerInterface $manager,
+        private PaginatorInterface $paginator,
     ) {
         $this->slugify = new Slugify;
     }
 
     public function index(Request $request): array {
+        $breadcrumb = new Breadcrumb([
+            new BreadcrumbItem('Liste des utilisateurs'),
+        ]);
 
-        return [];
+        $paginatedArcs = $this->getArcs($request);
+
+        return compact('paginatedArcs', 'breadcrumb');
+    }
+
+    /**
+     * @param  mixed $request
+     * @return PaginationInterface
+     */
+    public function getArcs(Request $request): PaginationInterface {
+
+        $data = $this->arcRepository->findAll();
+        $page = $request->query->getInt('page', 1);
+        $nbItems = $request->query->getInt('nbItems', 15);
+
+        return $this->paginator->paginate(
+            $data,
+            /* query NOT result */
+            $page,
+            /*page number*/
+            $nbItems, /*limit per page*/
+        );
     }
 
     /**

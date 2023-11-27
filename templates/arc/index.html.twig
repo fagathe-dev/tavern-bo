@@ -4,7 +4,8 @@
   <div class="row">
     <h1 class="h4 d-flex justify-content-between">
       Liste des arcs
-      <a href="{{ path('app_arc_create') }}" title="Créer un utilisateur" class="btn btn-sm btn-success">
+      {# {{ path('app_arc_create') }} #}
+      <a href="#" title="Créer un utilisateur" class="btn btn-sm btn-success">
         <i class="bi bi-plus-lg"></i>
       </a>
     </h1>
@@ -23,19 +24,21 @@
               <th scope="row">{{ arc.id }}</th>
               <td>{{ arc.name }}</td>
               <td>
+                {# {{ path('app_arc_edit', {
+                  id: arc.id
+                }) }} #}
                 <a 
-                  href="{{ path('app_arc_edit', {
-                    id: arc.id
-                  }) }}" 
+                  href="#" 
                   class="btn btn-info"
                   title="Modifier l'arc {{ arc.name }}"
                 >
                   <i class="bi bi-pencil-square"></i>
                 </a>
+                {# {{ path('app_arc_delete', {
+                  id: arc.id
+                }) }} #}
                 <a 
-                  href="{{ path('app_arc_delete', {
-                    id: arc.id
-                  }) }}" 
+                  href="#" 
                   class="btn btn-danger"
                   title="Supprimer l'arc {{ arc.name }}"
                   onclick="deleteArc(event);"
@@ -66,18 +69,18 @@
   <script>
     const deleteArc = async (e) => {
       e.preventDefault();
-      const url = e.target.href;
-      try {
-        const res = await axios.delete(url)
-        if (res.status === 204) {
-          e.target.closest('tr').remove();
-          new Toast('Arc deleted 🚀', 'success')
-        }
-      } catch (e) {
-        console.error(e.message);
-        new Toast(e.message, 'danger');
-      }
-      return;
+      // const url = e.target.href;
+      // try {
+      //   const res = await axios.delete(url)
+      //   if (res.status === 204) {
+      //     e.target.closest('tr').remove();
+      //     new Toast('Arc deleted 🚀', 'success')
+      //   }
+      // } catch (e) {
+      //   console.error(e.message);
+      //   new Toast(e.message, 'danger');
+      // }
+      // return;
     }
   </script>
 {% endblock %}
