@@ -1,9 +1,12 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Arc;
+use App\Form\Arc\CreateType;
 use App\Form\Arc\ImportType;
 use App\Service\ArcService;
 use App\Service\Breadcrumb\Breadcrumb;
+use App\Service\Breadcrumb\BreadcrumbItem;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +22,24 @@ final class ArcController extends AbstractController {
     public function index(Request $request): Response {
 
         return $this->render('arc/index.html.twig', $this->service->index($request));
+    }
+
+    #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
+    public function create(Request $request): Response {
+        $arc = new Arc;
+        $form = $this->createForm(CreateType::class, $arc);
+        $form->handleRequest($request);
+
+        $breadcrumb = new Breadcrumb([
+            new BreadcrumbItem('Liste des arcs', $this->generateUrl('app_arc_index')),
+            new BreadcrumbItem('Ajouter un arc'),
+        ]);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            dd($form->getData());
+        }
+
+        return $this->render('arc/create.html.twig', compact('form', 'breadcrumb'));
     }
 
     #[Route(path: '/import', name: 'import', methods: ['GET', 'POST'])]
