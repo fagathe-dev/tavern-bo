@@ -42,6 +42,12 @@ final class ArcService {
         $this->slugify = new Slugify;
     }
 
+    /**
+     * index
+     *
+     * @param  mixed $request
+     * @return array
+     */
     public function index(Request $request): array {
         $breadcrumb = new Breadcrumb([
             new BreadcrumbItem('Liste des utilisateurs'),
@@ -145,7 +151,7 @@ final class ArcService {
             }
         }
 
-        return $arc->getCreatedAt() === null ? $this->create($arc) : $this->update($arc);
+        return $arc->getCreatedAt() === null ? $this->create($form, $arc) : $this->update($arc);
     }
 
     public function getPosition(): int {
