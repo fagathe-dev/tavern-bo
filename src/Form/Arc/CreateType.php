@@ -15,10 +15,24 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class CreateType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options): void {
         $builder
-            ->add('name', TextType::class)
-            ->add('description', TextareaType::class)
-            ->add('position', NumberType::class)
+            ->add('name', TextType::class, [
+                'label' => 'Nom de l\'arc',
+                'required' => true,
+            ])
+            ->add('description', TextareaType::class, [
+                'required' => false,
+                'label' => 'Description',
+                'attr' => [
+                    'rows' => 3
+                ]
+            ])
+            ->add('position', NumberType::class, [
+                'required' => false,
+                'label' => 'Position de l\'arc (dans la chronologie)'
+            ])
             ->add('image', FileType::class, [
+                'label' => 'Ajouter une image',
+                'required' => false,
                 'mapped' => false
             ])
             ->add('save', SubmitType::class, [

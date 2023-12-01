@@ -6,6 +6,8 @@
 parameters:
     root_directory: '%kernel.project_dir%/public'
     uploads_directory: '/uploads'
+    arc_directory: '/arc'
+    import_directory: '/data'
     uploads_max_file_size: 10
 
 services:
