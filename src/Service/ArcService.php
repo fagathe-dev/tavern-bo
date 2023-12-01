@@ -12,6 +12,7 @@ use App\Repository\QuestionRepository;
 use App\Service\Breadcrumb\Breadcrumb;
 use App\Service\Breadcrumb\BreadcrumbItem;
 use App\Service\Import\ImportCsvService;
+use App\Service\Uploader\Uploader;
 use App\Utils\ServiceTrait;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,7 +22,9 @@ use Knp\Component\Pager\Pagination\PaginationInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Form;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
 final class ArcService {
@@ -38,6 +41,8 @@ final class ArcService {
         private Security $security,
         private EntityManagerInterface $manager,
         private PaginatorInterface $paginator,
+        private Uploader $uploader,
+        private ParameterBagInterface $parameters,
     ) {
         $this->slugify = new Slugify;
     }
@@ -87,6 +92,11 @@ final class ArcService {
         $arcName = $form->get('name')->getData();
         $file = $form->get('file')->getData();
         $position = $form->get('position')->getData() ?? ($this->getPosition() + 1);
+        $this->uploader->upload($file, [
+            'targetDir' => $this->parameters->get('arc_directory'),
+            'fileType' => 'text',
+            'renamed' => true
+        ]);
         $data = $this->importCsvService->getDataFromCsv($file);
         $arc = $this->arcRepository->findOneBy(['name' => $arcName]);
         if($arc === null) {
@@ -151,7 +161,34 @@ final class ArcService {
             }
         }
 
-        return $arc->getCreatedAt() === null ? $this->create($form, $arc) : $this->update($arc);
+        return $arc->getCreatedAt() === null ? $this->create($arc) : $this->update($arc);
+    }
+
+    /**
+     * saveImage
+     *
+     * @param  Form $form
+     * @param  Arc $arc
+     * @return Arc|Uploader
+     */
+    public function saveImage(Form $form, Arc $arc): Arc|Uploader {
+        $image = $form->get('image')->getData();
+        if($image instanceof UploadedFile) {
+            $upload = $this->uploader->upload($image, [
+                'targetDir' => $this->parameters->get('arc_directory'),
+                'fileType' => 'image'
+            ]);
+            $arc->setImage($this->parameters->get('uploads_directory').$upload->getUploadPath());
+            if($upload->hasErrors()) {
+                $message = '';
+                foreach($upload->getErrors() as $error) {
+                    $message .= $error->getMessage().', ';
+                }
+                $this->addFlash('danger', $message);
+                return $upload;
+            }
+        }
+        return $arc;
     }
 
     public function getPosition(): int {
@@ -170,7 +207,7 @@ final class ArcService {
     /**
      * create
      *
-     * @param  mixed $user
+     * @param  Arc $arc
      * @return bool
      */
     public function create(Arc $arc): bool {
@@ -188,7 +225,7 @@ final class ArcService {
                 'admin' => $this->getUser()->getId()
             ]);
         } else {
-            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
+            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de cet arc !');
         }
 
         return $result;
@@ -207,7 +244,7 @@ final class ArcService {
         if($result) {
             $this->addFlash('success', 'Arc enregistré 🚀');
         } else {
-            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
+            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de cet arc !');
         }
 
         return $result;
