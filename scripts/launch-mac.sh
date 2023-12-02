@@ -14,7 +14,7 @@ echo 'ouvrir le projet sur vscode'
 code .
 bin/console c:c -n
 echo "open http://${api_host}:${port} in browser"
-open http://$api_host:$port
+# open http://$api_host:$port
             
 # lance le serveur interne de php
 php -S $api_host:$port -t public

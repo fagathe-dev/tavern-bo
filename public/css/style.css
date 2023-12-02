@@ -1,5 +1,6 @@
 ::root {
   --shadow: -1px 1px 10px 2px rgba(0, 0, 0, 0.1);
+  --font-color: #212429;
 }
 
 html {
@@ -83,4 +84,16 @@ header .navbar-brand img,
   position: relative;
   height: 100%;
   width: 100%;
+}
+
+.breadcrumb-item a,
+.breadcrumb-item {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--font-color);
+  text-decoration: none;
+}
+
+.breadcrumb-item.active {
+  opacity: 0.7;
 }

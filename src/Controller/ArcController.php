@@ -2,7 +2,7 @@
 namespace App\Controller;
 
 use App\Entity\Arc;
-use App\Form\Arc\CreateType;
+use App\Form\Arc\ArcType;
 use App\Form\Arc\ImportType;
 use App\Service\ArcService;
 use App\Service\Breadcrumb\Breadcrumb;
@@ -24,10 +24,29 @@ final class ArcController extends AbstractController {
         return $this->render('arc/index.html.twig', $this->service->index($request));
     }
 
+    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function edit(Arc $arc, Request $request): Response {
+        $breadcrumb = new Breadcrumb([
+            new BreadcrumbItem('Liste des arcs', $this->generateUrl('app_arc_index')),
+            new BreadcrumbItem('Modifier un arc'),
+        ]);
+
+        $form = $this->createForm(ArcType::class, $arc);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            $result = $this->service->edit($form, $arc);
+            if($result === true){
+                return $this->redirectToRoute('app_arc_edit', ['id'=> $arc->getId()]);
+            }
+        }
+        return $this->render('arc/edit.html.twig', compact('form', 'arc', 'breadcrumb'));
+    }
+
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
     public function create(Request $request): Response {
         $arc = new Arc;
-        $form = $this->createForm(CreateType::class, $arc);
+        $form = $this->createForm(ArcType::class, $arc);
         $form->handleRequest($request);
 
         $breadcrumb = new Breadcrumb([

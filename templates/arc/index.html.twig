@@ -23,11 +23,10 @@
               <th scope="row">{{ arc.id }}</th>
               <td>{{ arc.name }}</td>
               <td>
-                {# {{ path('app_arc_edit', {
-                  id: arc.id
-                }) }} #}
                 <a 
-                  href="#" 
+                  href="{{ path('app_arc_edit', {
+                    id: arc.id
+                  }) }}" 
                   class="btn btn-info"
                   title="Modifier l'arc {{ arc.name }}"
                 >
