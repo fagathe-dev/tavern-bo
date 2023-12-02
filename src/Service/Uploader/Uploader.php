@@ -178,8 +178,9 @@ final class Uploader {
      * @return void
      */
     public function remove(?string $path = ''): void {
-        if($path !== null && $this->fs->exists($path)) {
-            $this->fs->remove($path);
+
+        if($path !== null && $this->fs->exists($this->parameters->get('root_directory').$path)) {
+            $this->fs->remove($this->parameters->get('root_directory').$path);
         }
     }
 

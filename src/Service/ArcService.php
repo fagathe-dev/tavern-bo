@@ -32,6 +32,7 @@ final class ArcService {
     use DateTimeHelperTrait;
 
     private Slugify $slugify;
+    private ?string $tmpFile;
 
     public function __construct(
         private ImportCsvService $importCsvService,
@@ -45,6 +46,7 @@ final class ArcService {
         private ParameterBagInterface $parameters,
     ) {
         $this->slugify = new Slugify;
+        $this->tmpFile = null;
     }
 
     /**
@@ -164,6 +166,15 @@ final class ArcService {
         return $arc->getCreatedAt() === null ? $this->create($arc) : $this->update($arc);
     }
 
+    public function edit(Form $form, Arc $arc): Uploader|bool {
+        $upload = $this->saveImage($form, $arc);
+        if($upload instanceof Uploader) {
+            return $upload;
+        }
+
+        return $this->update($arc);
+    }
+
     /**
      * saveImage
      *
@@ -178,6 +189,9 @@ final class ArcService {
                 'targetDir' => $this->parameters->get('arc_directory'),
                 'fileType' => 'image'
             ]);
+            if($arc->getImage() !== null) {
+                $this->tmpFile = $arc->getImage();
+            }
             $arc->setImage($this->parameters->get('uploads_directory').$upload->getUploadPath());
             if($upload->hasErrors()) {
                 $message = '';
@@ -239,6 +253,9 @@ final class ArcService {
      */
     public function update(Arc $arc): bool {
         $arc->setUpdatedAt($this->now());
+        if($this->tmpFile !== null) {
+            $this->uploader->remove($this->tmpFile);
+        }
         $result = $this->save($arc);
 
         if($result) {
