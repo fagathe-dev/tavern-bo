@@ -32,11 +32,10 @@
                 >
                   <i class="bi bi-pencil-square"></i>
                 </a>
-                {# {{ path('app_arc_delete', {
-                  id: arc.id
-                }) }} #}
                 <a 
-                  href="#" 
+                  href="{{ path('app_arc_delete', {
+                  id: arc.id
+                }) }}" 
                   class="btn btn-danger"
                   title="Supprimer l'arc {{ arc.name }}"
                   onclick="deleteArc(event);"
@@ -67,18 +66,19 @@
   <script>
     const deleteArc = async (e) => {
       e.preventDefault();
-      // const url = e.target.href;
-      // try {
-      //   const res = await axios.delete(url)
-      //   if (res.status === 204) {
-      //     e.target.closest('tr').remove();
-      //     new Toast('Arc deleted 🚀', 'success')
-      //   }
-      // } catch (e) {
-      //   console.error(e.message);
-      //   new Toast(e.message, 'danger');
-      // }
-      // return;
+      const url = e.target.href;
+      try {
+        const res = await axios.delete(url)
+        console.log(res)
+        if (res.status === 204) {
+          e.target.closest('tr').remove();
+          new Toast('Arc deleted 🚀', 'success')
+        }
+      } catch (e) {
+        console.error(e.message);
+        new Toast(e.message, 'danger');
+      }
+      return;
     }
   </script>
 {% endblock %}

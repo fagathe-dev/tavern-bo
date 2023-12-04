@@ -181,7 +181,10 @@ final class Uploader {
 
         if($path !== null && $this->fs->exists($this->parameters->get('root_directory').$path)) {
             $this->fs->remove($this->parameters->get('root_directory').$path);
+            $this->logger->info('File at {path} has been delete', ['path' => $path]);
+            return;
         }
+        $this->logger->info('No file at {path} has been found to delete.', ['path' => $path]);
     }
 
     /**
