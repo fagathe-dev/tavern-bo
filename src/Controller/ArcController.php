@@ -8,6 +8,7 @@ use App\Service\ArcService;
 use App\Service\Breadcrumb\Breadcrumb;
 use App\Service\Breadcrumb\BreadcrumbItem;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -36,8 +37,8 @@ final class ArcController extends AbstractController {
 
         if($form->isSubmitted() && $form->isValid()) {
             $result = $this->service->edit($form, $arc);
-            if($result === true){
-                return $this->redirectToRoute('app_arc_edit', ['id'=> $arc->getId()]);
+            if($result === true) {
+                return $this->redirectToRoute('app_arc_edit', ['id' => $arc->getId()]);
             }
         }
         return $this->render('arc/edit.html.twig', compact('form', 'arc', 'breadcrumb'));
@@ -62,6 +63,23 @@ final class ArcController extends AbstractController {
         }
 
         return $this->render('arc/create.html.twig', compact('form', 'breadcrumb'));
+    }
+
+    #[Route('/{id}', name: 'delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
+    public function delete(Arc $arc): JsonResponse {
+        $response = $this->service->remove($arc);
+        if(gettype($response) === 'object') {
+            return $this->json(
+                $response->data,
+                $response->status,
+                $response->headers,
+            );
+        }
+
+        return $this->json(
+            'BAD REQUEST',
+            Response::HTTP_BAD_REQUEST
+        );
     }
 
     #[Route(path: '/import', name: 'import', methods: ['GET', 'POST'])]

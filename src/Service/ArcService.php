@@ -307,4 +307,29 @@ final class ArcService {
         return null;
     }
 
+    /**
+     * remove
+     *
+     * @param  Arc $object
+     * @return object|bool
+     */
+    public function remove(Arc $arc): bool|object {
+        try {
+            $this->uploader->remove($arc->getImage());
+
+            $this->manager->remove($arc);
+            $this->manager->flush();
+            $this->logger->info('Arc {arcname} is removed form db', ['arcname' => $arc->getName()]);
+            return $this->sendNoContent();
+        } catch (ORMException $e) {
+            $this->addFlash('danger', 'Une erreur est survenue lors de la suppression de cet arc !');
+            $this->logger->error($e->getMessage());
+            return false;
+        } catch (Exception $e) {
+            $this->addFlash('danger', $e->getMessage());
+            $this->logger->error($e->getMessage());
+            return false;
+        }
+    }
+
 }
