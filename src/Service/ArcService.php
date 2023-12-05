@@ -73,7 +73,7 @@ final class ArcService {
 
         $data = $this->arcRepository->findAll();
         $page = $request->query->getInt('page', 1);
-        $nbItems = $request->query->getInt('nbItems', 15);
+        $nbItems = $request->query->getInt('nbItems', 10);
 
         return $this->paginator->paginate(
             $data,
