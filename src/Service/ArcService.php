@@ -52,7 +52,7 @@ final class ArcService {
     /**
      * index
      *
-     * @param  mixed $request
+     * @param  Request $request
      * @return array
      */
     public function index(Request $request): array {
@@ -66,14 +66,14 @@ final class ArcService {
     }
 
     /**
-     * @param  mixed $request
+     * @param  Request $request
      * @return PaginationInterface
      */
     public function getArcs(Request $request): PaginationInterface {
 
         $data = $this->arcRepository->findAll();
         $page = $request->query->getInt('page', 1);
-        $nbItems = $request->query->getInt('nbItems', 15);
+        $nbItems = $request->query->getInt('nbItems', 10);
 
         return $this->paginator->paginate(
             $data,
@@ -87,18 +87,14 @@ final class ArcService {
     /**
      * import
      *
-     * @param  mixed $form
+     * @param  Form $form
      * @return array
      */
     public function import(Form $form): bool {
         $arcName = $form->get('name')->getData();
         $file = $form->get('file')->getData();
-        $position = $form->get('position')->getData() ?? ($this->getPosition() + 1);
-        $this->uploader->upload($file, [
-            'targetDir' => $this->parameters->get('arc_directory'),
-            'fileType' => 'text',
-            'renamed' => true
-        ]);
+        $position = $form->get('position')->getData() ?? $this->getPosition();
+
         $data = $this->importCsvService->getDataFromCsv($file);
         $arc = $this->arcRepository->findOneBy(['name' => $arcName]);
         if($arc === null) {
@@ -107,6 +103,7 @@ final class ArcService {
                 ->setPosition($position)
             ;
         }
+        $this->handlePosition($arc, $position);
 
         if($data && count($data) > 0) {
             $questionPosition = $this->questionRepository->findLastQuestionByArc($arc)?->getPosition() ?? 0;
@@ -163,11 +160,26 @@ final class ArcService {
             }
         }
 
-        return $arc->getCreatedAt() === null ? $this->create($arc) : $this->update($arc);
+        $this->uploader->upload($file, [
+            'targetDir' => $this->parameters->get('arc_directory'),
+            'fileType' => 'text',
+            'renamed' => true
+        ]);
+
+        return $arc->getCreatedAt() === null ? $this->create($form, $arc) : $this->update($arc);
     }
 
+    /**
+     * edit
+     *
+     * @param  Form $form
+     * @param  Arc $arc
+     * @return Uploader|bool
+     */
     public function edit(Form $form, Arc $arc): Uploader|bool {
         $upload = $this->saveImage($form, $arc);
+        $this->handlePosition($arc, $form->get('position')->getData());
+
         if($upload instanceof Uploader) {
             return $upload;
         }
@@ -205,17 +217,48 @@ final class ArcService {
         return $arc;
     }
 
+    /**
+     * getPosition
+     *
+     * @return int
+     */
     public function getPosition(): int {
         $last = $this->arcRepository->findLastPosition();
 
         if($last instanceof Arc) {
-            return $last->getPosition();
+            return $last->getPosition() + 1;
         }
-        return 0;
+
+        return 1;
     }
 
-    public function updatePosition(int $position): void {
+    /**
+     * handlePosition
+     *
+     * @param  mixed $arc
+     * @param  mixed $position
+     * @return void
+     */
+    public function handlePosition(Arc $arc, ?int $position = null): void {
+        if($position === null) {
+            $position = $this->getPosition();
+        }
 
+        $arcsToUpdate = $this->arcRepository->findArcAfter($position, $arc);
+        $arc->setPosition($position);
+
+        if(count($arcsToUpdate) > 0) {
+            $pos = $position + 1;
+            foreach($arcsToUpdate as $value) {
+                if($arc->getId() !== $value->getId()) {
+                    $value->setPosition($pos);
+                    $this->manager->persist($value);
+                    $pos++;
+                }
+            }
+
+            $this->manager->flush();
+        }
     }
 
     /**
@@ -224,10 +267,11 @@ final class ArcService {
      * @param  Arc $arc
      * @return bool
      */
-    public function create(Arc $arc): bool {
+    public function create(Form $form, Arc $arc): bool {
         $arc
             ->setCreatedAt($this->now())
             ->setSlug($arc->getName());
+        $this->handlePosition($arc, $form->get('position')->getData());
 
         $result = $this->save($arc);
         $user = $this->getUser();
@@ -253,6 +297,9 @@ final class ArcService {
      */
     public function update(Arc $arc): bool {
         $arc->setUpdatedAt($this->now());
+
+        $this->handlePosition($arc, $arc->getPosition());
+
         if($this->tmpFile !== null) {
             $this->uploader->remove($this->tmpFile);
         }

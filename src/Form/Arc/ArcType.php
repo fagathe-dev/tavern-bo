@@ -14,6 +14,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ArcType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options): void {
+        // dd($options);
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Nom de l\'arc',
@@ -28,7 +29,11 @@ class ArcType extends AbstractType {
             ])
             ->add('position', NumberType::class, [
                 'required' => false,
-                'label' => 'Position de l\'arc (dans la chronologie)'
+                'label' => 'Position de l\'arc (dans la chronologie)',
+                'mapped' => false,
+                'attr' => [
+                    'value' => $options['data']->getPosition(),
+                ],
             ])
             ->add('image', FileType::class, [
                 'label' => 'Ajouter une image',
