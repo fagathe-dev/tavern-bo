@@ -19,6 +19,11 @@ class ArcRepository extends ServiceEntityRepository {
         parent::__construct($registry, Arc::class);
     }
 
+    /**
+     * findLastPosition
+     *
+     * @return Arc
+     */
     public function findLastPosition(): Arc {
         return $this->createQueryBuilder('a')
             ->orderBy('a.position', 'DESC')
@@ -27,7 +32,29 @@ class ArcRepository extends ServiceEntityRepository {
             ->getOneOrNullResult()
         ;
     }
-    
+
+    /**
+     * findArcAfter
+     *
+     * @param  Arc|int $position
+     * @return array Arc[]
+     */
+    public function findArcAfter(int $position, ?Arc $arc = null): array {
+        $qb = $this->createQueryBuilder('a')
+            ->andWhere('a.position >= :val')
+            ->setParameter('val', $position);
+        if($arc->getId()) {
+            $qb->andWhere('a.id <> :id')
+                ->setParameter('id', $arc->getId());
+        }
+
+        return $qb->orderBy('a.position', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+
+    }
+
     //    /**
 //     * @return Arc[] Returns an array of Arc objects
 //     */

@@ -119,7 +119,7 @@ final class UserService {
      * remove
      *
      * @param  User $object
-     * @return object
+     * @return object|bool
      */
     public function remove(User $user): bool|object {
         try {
@@ -136,7 +136,6 @@ final class UserService {
             $this->logger->error($e->getMessage());
             return false;
         }
-
     }
 
     public function updatePassword(string $plainPassword, User $user): bool {

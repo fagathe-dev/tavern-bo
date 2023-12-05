@@ -45,9 +45,13 @@ final class Uploader {
      *
      * @param  UploadedFile $file
      * @param  string $targetDir
-     * @return void
+     * @return self
      */
-    public function upload(?UploadedFile $file, string $targetDir = '', ?string $fileType = null): self {
+    public function upload(?UploadedFile $file, ?array $options = []): self {
+        $targetDir = $options['targetDir'] ?? '';
+        $fileType = $options['fileType'] ?? '';
+        $renamed = $options['renamed'] ?? true;
+
         if($file === null) {
             $error = new UploadError('Aucun fichier reçu', 'file', UploadError::UPLOAD_NO_CONTENT);
             $this->setErrors($error);
@@ -88,8 +92,9 @@ final class Uploader {
             return $this;
         }
 
-        $this->generateFileName($file)
-            ->setUploadDir($targetDir)
+        $renamed ? $this->generateFileName($file) : $this->setFileName($file->getClientOriginalName());
+
+        $this->setUploadDir($targetDir)
             ->setUploadPath($targetDir)
         ;
 
@@ -173,9 +178,13 @@ final class Uploader {
      * @return void
      */
     public function remove(?string $path = ''): void {
-        if($path !== null && $this->fs->exists($path)) {
-            $this->fs->remove($path);
+
+        if($path !== null && $this->fs->exists($this->parameters->get('root_directory').$path)) {
+            $this->fs->remove($this->parameters->get('root_directory').$path);
+            $this->logger->info('File at {path} has been delete', ['path' => $path]);
+            return;
         }
+        $this->logger->info('No file at {path} has been found to delete.', ['path' => $path]);
     }
 
     /**
@@ -220,7 +229,7 @@ final class Uploader {
      * @return self
      */
     public function setUploadDir(string $uploadDir): self {
-        $this->uploadDir = $this->getBaseDir().DIRECTORY_SEPARATOR.$uploadDir;
+        $this->uploadDir = $this->getBaseDir().$uploadDir;
 
         return $this;
     }
@@ -259,7 +268,7 @@ final class Uploader {
      * @return  self
      */
     public function setUploadPath(string $uploadPath): self {
-        $this->uploadPath = $uploadPath.$this->getFileName();
+        $this->uploadPath = $uploadPath.DIRECTORY_SEPARATOR.$this->getFileName();
 
         return $this;
     }

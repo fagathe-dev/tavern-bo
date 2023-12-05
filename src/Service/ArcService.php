@@ -12,6 +12,7 @@ use App\Repository\QuestionRepository;
 use App\Service\Breadcrumb\Breadcrumb;
 use App\Service\Breadcrumb\BreadcrumbItem;
 use App\Service\Import\ImportCsvService;
+use App\Service\Uploader\Uploader;
 use App\Utils\ServiceTrait;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,7 +22,9 @@ use Knp\Component\Pager\Pagination\PaginationInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Form;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
 final class ArcService {
@@ -29,6 +32,7 @@ final class ArcService {
     use DateTimeHelperTrait;
 
     private Slugify $slugify;
+    private ?string $tmpFile;
 
     public function __construct(
         private ImportCsvService $importCsvService,
@@ -38,10 +42,19 @@ final class ArcService {
         private Security $security,
         private EntityManagerInterface $manager,
         private PaginatorInterface $paginator,
+        private Uploader $uploader,
+        private ParameterBagInterface $parameters,
     ) {
         $this->slugify = new Slugify;
+        $this->tmpFile = null;
     }
 
+    /**
+     * index
+     *
+     * @param  Request $request
+     * @return array
+     */
     public function index(Request $request): array {
         $breadcrumb = new Breadcrumb([
             new BreadcrumbItem('Liste des utilisateurs'),
@@ -53,14 +66,14 @@ final class ArcService {
     }
 
     /**
-     * @param  mixed $request
+     * @param  Request $request
      * @return PaginationInterface
      */
     public function getArcs(Request $request): PaginationInterface {
 
         $data = $this->arcRepository->findAll();
         $page = $request->query->getInt('page', 1);
-        $nbItems = $request->query->getInt('nbItems', 15);
+        $nbItems = $request->query->getInt('nbItems', 10);
 
         return $this->paginator->paginate(
             $data,
@@ -74,13 +87,14 @@ final class ArcService {
     /**
      * import
      *
-     * @param  mixed $form
+     * @param  Form $form
      * @return array
      */
     public function import(Form $form): bool {
         $arcName = $form->get('name')->getData();
         $file = $form->get('file')->getData();
-        $position = $form->get('position')->getData() ?? ($this->getPosition() + 1);
+        $position = $form->get('position')->getData() ?? $this->getPosition();
+
         $data = $this->importCsvService->getDataFromCsv($file);
         $arc = $this->arcRepository->findOneBy(['name' => $arcName]);
         if($arc === null) {
@@ -89,6 +103,7 @@ final class ArcService {
                 ->setPosition($position)
             ;
         }
+        $this->handlePosition($arc, $position);
 
         if($data && count($data) > 0) {
             $questionPosition = $this->questionRepository->findLastQuestionByArc($arc)?->getPosition() ?? 0;
@@ -145,32 +160,118 @@ final class ArcService {
             }
         }
 
-        return $arc->getCreatedAt() === null ? $this->create($arc) : $this->update($arc);
+        $this->uploader->upload($file, [
+            'targetDir' => $this->parameters->get('arc_directory'),
+            'fileType' => 'text',
+            'renamed' => true
+        ]);
+
+        return $arc->getCreatedAt() === null ? $this->create($form, $arc) : $this->update($arc);
     }
 
+    /**
+     * edit
+     *
+     * @param  Form $form
+     * @param  Arc $arc
+     * @return Uploader|bool
+     */
+    public function edit(Form $form, Arc $arc): Uploader|bool {
+        $upload = $this->saveImage($form, $arc);
+        $this->handlePosition($arc, $form->get('position')->getData());
+
+        if($upload instanceof Uploader) {
+            return $upload;
+        }
+
+        return $this->update($arc);
+    }
+
+    /**
+     * saveImage
+     *
+     * @param  Form $form
+     * @param  Arc $arc
+     * @return Arc|Uploader
+     */
+    public function saveImage(Form $form, Arc $arc): Arc|Uploader {
+        $image = $form->get('image')->getData();
+        if($image instanceof UploadedFile) {
+            $upload = $this->uploader->upload($image, [
+                'targetDir' => $this->parameters->get('arc_directory'),
+                'fileType' => 'image'
+            ]);
+            if($arc->getImage() !== null) {
+                $this->tmpFile = $arc->getImage();
+            }
+            $arc->setImage($this->parameters->get('uploads_directory').$upload->getUploadPath());
+            if($upload->hasErrors()) {
+                $message = '';
+                foreach($upload->getErrors() as $error) {
+                    $message .= $error->getMessage().', ';
+                }
+                $this->addFlash('danger', $message);
+                return $upload;
+            }
+        }
+        return $arc;
+    }
+
+    /**
+     * getPosition
+     *
+     * @return int
+     */
     public function getPosition(): int {
         $last = $this->arcRepository->findLastPosition();
 
         if($last instanceof Arc) {
-            return $last->getPosition();
+            return $last->getPosition() + 1;
         }
-        return 0;
+
+        return 1;
     }
 
-    public function updatePosition(int $position): void {
+    /**
+     * handlePosition
+     *
+     * @param  mixed $arc
+     * @param  mixed $position
+     * @return void
+     */
+    public function handlePosition(Arc $arc, ?int $position = null): void {
+        if($position === null) {
+            $position = $this->getPosition();
+        }
 
+        $arcsToUpdate = $this->arcRepository->findArcAfter($position, $arc);
+        $arc->setPosition($position);
+
+        if(count($arcsToUpdate) > 0) {
+            $pos = $position + 1;
+            foreach($arcsToUpdate as $value) {
+                if($arc->getId() !== $value->getId()) {
+                    $value->setPosition($pos);
+                    $this->manager->persist($value);
+                    $pos++;
+                }
+            }
+
+            $this->manager->flush();
+        }
     }
 
     /**
      * create
      *
-     * @param  mixed $user
+     * @param  Arc $arc
      * @return bool
      */
-    public function create(Arc $arc): bool {
+    public function create(Form $form, Arc $arc): bool {
         $arc
             ->setCreatedAt($this->now())
             ->setSlug($arc->getName());
+        $this->handlePosition($arc, $form->get('position')->getData());
 
         $result = $this->save($arc);
         $user = $this->getUser();
@@ -182,7 +283,7 @@ final class ArcService {
                 'admin' => $this->getUser()->getId()
             ]);
         } else {
-            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
+            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de cet arc !');
         }
 
         return $result;
@@ -196,12 +297,18 @@ final class ArcService {
      */
     public function update(Arc $arc): bool {
         $arc->setUpdatedAt($this->now());
+
+        $this->handlePosition($arc, $arc->getPosition());
+
+        if($this->tmpFile !== null) {
+            $this->uploader->remove($this->tmpFile);
+        }
         $result = $this->save($arc);
 
         if($result) {
             $this->addFlash('success', 'Arc enregistré 🚀');
         } else {
-            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de ce compte !');
+            $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement de cet arc !');
         }
 
         return $result;
@@ -245,6 +352,31 @@ final class ArcService {
             return $user;
         }
         return null;
+    }
+
+    /**
+     * remove
+     *
+     * @param  Arc $object
+     * @return object|bool
+     */
+    public function remove(Arc $arc): bool|object {
+        try {
+            $this->uploader->remove($arc->getImage());
+
+            $this->manager->remove($arc);
+            $this->manager->flush();
+            $this->logger->info('Arc {arcname} is removed form db', ['arcname' => $arc->getName()]);
+            return $this->sendNoContent();
+        } catch (ORMException $e) {
+            $this->addFlash('danger', 'Une erreur est survenue lors de la suppression de cet arc !');
+            $this->logger->error($e->getMessage());
+            return false;
+        } catch (Exception $e) {
+            $this->addFlash('danger', $e->getMessage());
+            $this->logger->error($e->getMessage());
+            return false;
+        }
     }
 
 }
