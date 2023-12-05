@@ -57,7 +57,7 @@ final class ArcController extends AbstractController {
 
         if($form->isSubmitted() && $form->isValid()) {
             $upload = $this->service->saveImage($form, $arc);
-            if($upload instanceof Arc && $this->service->create($arc)) {
+            if($upload instanceof Arc && $this->service->create($form, $arc)) {
                 return $this->redirectToRoute('app_arc_index');
             }
         }
@@ -91,6 +91,8 @@ final class ArcController extends AbstractController {
 
         if($form->isSubmitted() && $form->isValid()) {
             $this->service->import($form);
+
+            return $this->redirectToRoute('app_arc_index');
         }
 
         return $this->render("arc/import.html.twig", compact('form', 'breadcrumb'));

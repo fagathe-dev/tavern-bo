@@ -36,17 +36,23 @@ class ArcRepository extends ServiceEntityRepository {
     /**
      * findArcAfter
      *
-     * @param  int $position
+     * @param  Arc|int $position
      * @return array Arc[]
      */
-    public function findArcAfter(int $position): array {
-        return $this->createQueryBuilder('a')
-            ->andWhere('a.position = :val')
-            ->setParameter('val', $position)
-            ->orderBy('a.position', 'ASC')
+    public function findArcAfter(int $position, ?Arc $arc = null): array {
+        $qb = $this->createQueryBuilder('a')
+            ->andWhere('a.position >= :val')
+            ->setParameter('val', $position);
+        if($arc->getId()) {
+            $qb->andWhere('a.id <> :id')
+                ->setParameter('id', $arc->getId());
+        }
+
+        return $qb->orderBy('a.position', 'ASC')
             ->getQuery()
             ->getResult()
         ;
+
     }
 
     //    /**

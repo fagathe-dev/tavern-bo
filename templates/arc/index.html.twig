@@ -14,6 +14,7 @@
           <tr>
             <th scope="col">ID</th>
             <th scope="col">Nom</th>
+            <th scope="col">Position</th>
             <th scope="col">Actions</th>
           </tr>
         </thead>
@@ -22,6 +23,7 @@
             <tr>
               <th scope="row">{{ arc.id }}</th>
               <td>{{ arc.name }}</td>
+              <td>{{ arc.position }}</td>
               <td>
                 <a 
                   href="{{ path('app_arc_edit', {
