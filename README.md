@@ -35,6 +35,7 @@ Générer les migrations
 ```php
 php bin/console make:migration
 php bin/console doctrine:migrations:migrate --no-interaction
+
 ```
 
 Vider le cache  
