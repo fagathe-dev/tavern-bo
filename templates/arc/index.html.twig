@@ -26,6 +26,15 @@
               <td>{{ arc.position }}</td>
               <td>
                 <a 
+                  href="{{ path('app_arc_show', {
+                    id: arc.id
+                  }) }}" 
+                  class="btn btn-primary"
+                  title="Afficher l'arc {{ arc.name }}"
+                >
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a 
                   href="{{ path('app_arc_edit', {
                     id: arc.id
                   }) }}" 
@@ -36,8 +45,8 @@
                 </a>
                 <a 
                   href="{{ path('app_arc_delete', {
-                  id: arc.id
-                }) }}" 
+                    id: arc.id
+                  }) }}" 
                   class="btn btn-danger"
                   title="Supprimer l'arc {{ arc.name }}"
                   onclick="deleteArc(event);"

@@ -25,6 +25,11 @@ final class ArcController extends AbstractController {
         return $this->render('arc/index.html.twig', $this->service->index($request));
     }
 
+    #[Route('/{id}', name: 'show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function show(Arc $arc, Request $request): Response {
+        return $this->render('arc/show.html.twig', $this->service->show($arc, $request));
+    }
+
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Arc $arc, Request $request): Response {
         $breadcrumb = new Breadcrumb([

@@ -97,3 +97,7 @@ header .navbar-brand img,
 .breadcrumb-item.active {
   opacity: 0.7;
 }
+
+hr {
+  color: rgba(0, 0, 0, 0.45);
+}

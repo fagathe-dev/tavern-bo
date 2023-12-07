@@ -235,8 +235,8 @@ final class ArcService {
     /**
      * handlePosition
      *
-     * @param  mixed $arc
-     * @param  mixed $position
+     * @param  Arc $arc
+     * @param  int|null $position
      * @return void
      */
     public function handlePosition(Arc $arc, ?int $position = null): void {
@@ -265,6 +265,7 @@ final class ArcService {
      * create
      *
      * @param  Arc $arc
+     * @param  Form $form
      * @return bool
      */
     public function create(Form $form, Arc $arc): bool {
@@ -352,6 +353,22 @@ final class ArcService {
             return $user;
         }
         return null;
+    }
+
+    public function show(Arc $arc, Request $request): array {
+        $data = $arc->getQuestions();
+        $page = $request->query->getInt('page', 1);
+        $nbItems = $request->query->getInt('nbItems', 10);
+
+        $paginatedQuestions = $this->paginator->paginate(
+            $data,
+            /* query NOT result */
+            $page,
+            /*page number*/
+            $nbItems, /*limit per page*/
+        );
+        
+        return compact('arc', 'paginatedQuestions');
     }
 
     /**
